@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
+const isVercel = process.env.VERCEL === '1';
+
 const nextConfig = {
-  output: 'export',
+  ...(isVercel ? {} : { output: 'export' }),
   images: {
     unoptimized: true,
   },
@@ -10,6 +12,20 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  ...(isVercel
+    ? {
+        async redirects() {
+          return [
+            {
+              source: '/downloads/Mount-Windows-x64.zip',
+              destination:
+                'https://github.com/Rachit315/Mount/releases/download/v1.0.0/Mount-Windows-x64.zip',
+              permanent: false,
+            },
+          ];
+        },
+      }
+    : {}),
 };
 
 export default nextConfig;

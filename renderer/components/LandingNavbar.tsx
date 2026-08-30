@@ -3,21 +3,11 @@
 import Link from 'next/link';
 import { LogoIcon } from './LogoIcon';
 
-const GITHUB_RELEASE_DOWNLOAD_URL = 'https://github.com/Rachit315/Mount/releases/latest/download/Mount-Windows-x64.zip';
-
 interface LandingNavbarProps {
   onOpenDownload: () => void;
 }
 
 export function LandingNavbar({ onOpenDownload }: LandingNavbarProps) {
-  const triggerDownload = () => {
-    // Open instructions modal and trigger release asset download
-    onOpenDownload();
-    if (typeof window !== 'undefined') {
-      window.open(GITHUB_RELEASE_DOWNLOAD_URL, '_blank');
-    }
-  };
-
   return (
     <header className="sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-lg border-b border-[#27272A] transition-all">
       <div className="max-w-[1240px] mx-auto px-6 h-16 flex items-center justify-between">
@@ -61,7 +51,7 @@ export function LandingNavbar({ onOpenDownload }: LandingNavbarProps) {
           </Link>
 
           <button
-            onClick={triggerDownload}
+            onClick={onOpenDownload}
             className="vortex-btn-primary h-9 text-[12px] px-4"
           >
             <svg

@@ -3,20 +3,11 @@
 import Link from 'next/link';
 import { AudioVisualizerWave } from './AudioVisualizerWave';
 
-const GITHUB_RELEASE_DOWNLOAD_URL = 'https://github.com/Rachit315/Mount/releases/latest/download/Mount-Windows-x64.zip';
-
 interface LandingHeroProps {
   onOpenDownload: () => void;
 }
 
 export function LandingHero({ onOpenDownload }: LandingHeroProps) {
-  const triggerDownload = () => {
-    onOpenDownload();
-    if (typeof window !== 'undefined') {
-      window.open(GITHUB_RELEASE_DOWNLOAD_URL, '_blank');
-    }
-  };
-
   return (
     <section className="relative pt-24 pb-20 px-6 text-center max-w-[1240px] mx-auto z-10">
       {/* Vortex System Tag */}
@@ -45,7 +36,7 @@ export function LandingHero({ onOpenDownload }: LandingHeroProps) {
       {/* Action Buttons */}
       <div className="flex flex-wrap items-center justify-center gap-4 mb-20">
         <button
-          onClick={triggerDownload}
+          onClick={onOpenDownload}
           className="vortex-btn-primary h-12 px-6 text-[13px]"
         >
           <svg

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { LogoIcon } from './LogoIcon';
 
+const DIRECT_ZIP_DOWNLOAD_URL = 'https://github.com/Rachit315/Mount/releases/download/v1.0.0/Mount-Windows-x64.zip';
 const GITHUB_RELEASES_PAGE = 'https://github.com/Rachit315/Mount/releases';
 const CLONE_COMMAND = 'git clone https://github.com/Rachit315/Mount.git && cd Mount && npm install && npm run dev';
 
@@ -49,7 +50,7 @@ export function LandingDownloadModal({ isOpen, onClose }: LandingDownloadModalPr
 
         {/* Content */}
         <p className="text-[12px] font-mono text-[#A1A1AA] mb-4 leading-relaxed">
-          Standalone executable bundle with precompiled native Win32 keyboard drivers. 100% offline with zero installation required.
+          Standalone executable bundle with precompiled native Win32 keyboard drivers. 100% offline with zero installation setup.
         </p>
 
         {/* 3 Step Setup Guide */}
@@ -57,19 +58,19 @@ export function LandingDownloadModal({ isOpen, onClose }: LandingDownloadModalPr
           <div className="flex items-start gap-3">
             <span className="text-[#00AFFF] font-bold">01 //</span>
             <p className="text-[#A1A1AA]">
-              Download and extract <code className="text-[#FFFFFF] bg-[#18181B] border border-[#27272A] px-1.5 py-0.5 rounded-[2px]">Mount-Windows-x64.zip</code> from GitHub Releases
+              Download <code className="text-[#FFFFFF] bg-[#18181B] border border-[#27272A] px-1.5 py-0.5 rounded-[2px]">Mount-Windows-x64.zip</code> (106.7 MB)
             </p>
           </div>
           <div className="flex items-start gap-3">
             <span className="text-[#00AFFF] font-bold">02 //</span>
             <p className="text-[#A1A1AA]">
-              Double-click <strong className="text-[#FFFFFF]">Mount.exe</strong> to start global acoustic capture
+              Extract the zip archive to any folder on your PC
             </p>
           </div>
           <div className="flex items-start gap-3">
             <span className="text-[#00AFFF] font-bold">03 //</span>
             <p className="text-[#A1A1AA]">
-              Press <kbd className="text-[#00AFFF] bg-[#18181B] border border-[#27272A] px-1.5 py-0.5 rounded-[2px]">Ctrl+Shift+K</kbd> to toggle controls
+              Launch <strong className="text-[#FFFFFF]">Mount.exe</strong> to start global acoustic capture
             </p>
           </div>
         </div>
@@ -95,9 +96,7 @@ export function LandingDownloadModal({ isOpen, onClose }: LandingDownloadModalPr
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-3">
           <a
-            href={GITHUB_RELEASES_PAGE}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={DIRECT_ZIP_DOWNLOAD_URL}
             className="vortex-btn-primary flex-1 h-10 text-[12px] flex items-center justify-center gap-2"
           >
             <svg
@@ -114,12 +113,22 @@ export function LandingDownloadModal({ isOpen, onClose }: LandingDownloadModalPr
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
-            <span>GITHUB RELEASES PAGE</span>
+            <span>DOWNLOAD .ZIP</span>
+          </a>
+
+          <a
+            href={GITHUB_RELEASES_PAGE}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="vortex-btn-ghost h-10 px-4 text-[12px] flex items-center gap-1.5"
+          >
+            <span>RELEASES PAGE</span>
+            <span className="text-[#00AFFF]">↗</span>
           </a>
 
           <button
             onClick={onClose}
-            className="vortex-btn-ghost h-10 px-4 text-[12px]"
+            className="vortex-btn-ghost h-10 px-3 text-[12px]"
           >
             DISMISS
           </button>

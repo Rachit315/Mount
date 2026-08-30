@@ -33,29 +33,35 @@ export function LandingHero({ onOpenDownload }: LandingHeroProps) {
         <AudioVisualizerWave height={44} />
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex flex-wrap items-center justify-center gap-4 mb-20">
-        <button
-          onClick={onOpenDownload}
-          className="vortex-btn-primary h-12 px-6 text-[13px]"
+      {/* Action Buttons — Download for Windows & macOS */}
+      <div className="flex flex-wrap items-center justify-center gap-3 mb-20">
+        {/* Windows Download */}
+        <a
+          href="https://github.com/Rachit315/Mount/releases/download/v1.0.0/Mount-Windows-x64.zip"
+          className="vortex-btn-primary h-12 px-6 text-[13px] flex items-center gap-2"
         >
-          <svg
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
-          <span>DOWNLOAD FOR WINDOWS (.ZIP)</span>
-        </button>
+          <span>DOWNLOAD FOR WINDOWS</span>
+        </a>
 
+        {/* macOS Download */}
+        <a
+          href="https://github.com/Rachit315/Mount/releases/download/v1.0.0/Mount-macOS-arm64.zip"
+          className="h-12 px-6 text-[13px] font-mono font-semibold flex items-center gap-2 rounded-[2px] border border-[#00AFFF]/40 text-[#00AFFF] bg-[#00AFFF]/5 hover:bg-[#00AFFF]/15 hover:border-[#00AFFF]/60 transition-all cursor-pointer"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          <span>DOWNLOAD FOR macOS</span>
+        </a>
+
+        {/* Tray popover link */}
         <Link
           href="/app"
           className="font-mono text-[12px] text-[#A1A1AA] hover:text-[#FFFFFF] px-4 py-3 transition-colors bg-[#18181B] border border-[#27272A] rounded-[2px] hover:border-[#3F3F46]"
@@ -70,7 +76,7 @@ export function LandingHero({ onOpenDownload }: LandingHeroProps) {
         <div className="p-4 bg-[#18181B] border border-[#27272A] rounded-[2px] hover:border-[#00AFFF]/40 transition-colors">
           <p className="label-md text-[#71717A]">// LATENCY</p>
           <p className="text-[20px] font-semibold text-[#FFFFFF] mt-1 font-mono">&lt;10MS</p>
-          <p className="text-[11px] text-[#A1A1AA] mt-0.5 font-mono">Win32 low-level hook</p>
+          <p className="text-[11px] text-[#A1A1AA] mt-0.5 font-mono">Native low-level hook</p>
         </div>
 
         <div className="p-4 bg-[#18181B] border border-[#27272A] rounded-[2px] hover:border-[#00AFFF]/40 transition-colors">
@@ -94,3 +100,5 @@ export function LandingHero({ onOpenDownload }: LandingHeroProps) {
     </section>
   );
 }
+
+

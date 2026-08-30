@@ -2,7 +2,7 @@
 
 **Real mechanical keyboard sounds for your PC. Open source.**
 
-Mount plays authentic mechanical switch sounds while you type anywhere on your PC, with spatial audio, a live visualizer, and per-switch customization — offline, open source, built on web tech.
+Mount plays authentic mechanical switch sounds while you type anywhere on your PC or Mac, with spatial audio, a live visualizer, and per-switch customization — offline, open source, built on web tech.
 
 ---
 
@@ -13,9 +13,10 @@ Mount plays authentic mechanical switch sounds while you type anywhere on your P
 - 🎧 **Spatial Audio** — Stereo panning based on key coordinate positions for immersive typing
 - 🎛️ **Sound Customization** — Volume, Tone (Thock ↔ Clack DSP filter), and Pitch rate controls
 - ⌨️ **Live Visualizer** — Compact keyboard matrix & audio waveform pulses with each keystroke
-- 🖥️ **System Tray App** — Lives in your system tray with low resource footprint
-- ⌨️ **Global Shortcut** — `Ctrl+Shift+K` toggles the popover from anywhere
+- 🖥️ **System Tray / Menu Bar App** — Lives in your system tray (Windows) or menu bar (macOS) with low resource footprint
+- ⌨️ **Global Shortcut** — `Ctrl+Shift+K` (Windows) / `⌘+Shift+K` (macOS) toggles the popover from anywhere
 - 🔒 **Fully Offline** — Zero network requests, zero analytics, zero data collection
+- 🍎 **Cross-Platform** — Native support for both Windows and macOS
 - 📖 **MIT Licensed** — Fully open source
 
 ## 🏗️ Tech Stack
@@ -35,7 +36,7 @@ Mount plays authentic mechanical switch sounds while you type anywhere on your P
 ### Prerequisites
 
 - **Node.js** 18+ and **npm**
-- **Windows 10/11**
+- **Windows 10/11** or **macOS 12+** (Monterey or later)
 
 ### Development
 
@@ -51,14 +52,28 @@ The renderer runs on `http://localhost:3000`. Electron loads from it and capture
 
 > **Tip:** You can also open `http://localhost:3000` directly in your browser to preview the UI. Keyboard sounds will play when the browser tab is focused (using the browser keyboard fallback).
 
+#### macOS: Accessibility Permission
+
+On macOS, Mount requires **Accessibility permission** to capture global keystrokes. When you first run the app, macOS will prompt you to grant this permission:
+
+1. Open **System Settings → Privacy & Security → Accessibility**
+2. Enable the toggle for **Mount** (or **Electron** during development)
+3. Restart Mount if needed
+
 ### Production Build
 
 ```bash
 # Build everything
 npm run build
 
-# Package as Windows installer
+# Package for Windows
 npm run dist
+
+# Package for macOS
+npm run dist:mac
+
+# Package for both platforms (on macOS only)
+npm run dist:all
 ```
 
 The installer will be generated in the `release/` directory.
@@ -92,7 +107,7 @@ mount/
 │   └── types/
 │       └── electron.d.ts      # Type declarations for IPC bridge
 ├── assets/
-│   └── icon.png              # System tray icon
+│   └── icon.png              # App icon (tray / menu bar)
 ├── LICENSE                   # MIT
 └── README.md
 ```

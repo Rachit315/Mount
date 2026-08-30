@@ -45,14 +45,81 @@ jobs:
         run: |
           Compress-Archive -Path "release/win-unpacked/*" -DestinationPath "Mount-Windows-x64.zip" -Force
 
-      - name: Create GitHub Release and Upload Asset
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mount-windows
+          path: Mount-Windows-x64.zip
+
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install renderer dependencies
+        run: npm --prefix renderer ci
+
+      - name: Build Next.js static export
+        run: npm --prefix renderer run build
+
+      - name: Build Electron TypeScript
+        run: npm run build:electron
+
+      - name: Package Electron App with electron-builder
+        run: npx electron-builder --mac --dir
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Create Zip Archive
+        run: |
+          cd release/mac-arm64
+          zip -r ../../Mount-macOS-arm64.zip Mount.app
+          cd ../..
+
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mount-macos
+          path: Mount-macOS-arm64.zip
+
+  release:
+    needs: [build-windows, build-macos]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Download Windows Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mount-windows
+
+      - name: Download macOS Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mount-macos
+
+      - name: Create GitHub Release and Upload Assets
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
           name: Mount ${{ github.ref_name }}
-          files: Mount-Windows-x64.zip
+          files: |
+            Mount-Windows-x64.zip
+            Mount-macOS-arm64.zip
           draft: false
           prerelease: false
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

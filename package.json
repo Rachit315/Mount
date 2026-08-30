@@ -8,11 +8,13 @@
   "scripts": {
     "dev": "concurrently -k -n renderer,electron -c blue,green \"npm run dev:renderer\" \"npm run dev:electron\"",
     "dev:renderer": "npm --prefix renderer run dev",
-    "dev:electron": "wait-on http://localhost:3000 && electron .",
+    "dev:electron": "npx wait-on http://localhost:3000 && electron .",
     "build:electron": "tsc",
     "build:renderer": "npm --prefix renderer run build",
     "build": "npm run build:renderer && npm run build:electron",
     "dist": "npm run build && electron-builder --win --dir -c.win.signAndEditExecutable=false",
+    "dist:mac": "npm run build && electron-builder --mac --dir",
+    "dist:all": "npm run build && electron-builder --win --mac --dir -c.win.signAndEditExecutable=false",
     "postinstall": "npm --prefix renderer install"
   },
   "dependencies": {
@@ -50,6 +52,33 @@
         "dir"
       ],
       "signAndEditExecutable": false
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "assets/icon.png",
+      "category": "public.app-category.utilities",
+      "identity": null,
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "entitlements": null,
+      "entitlementsInherit": null
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
     }
   }
 }

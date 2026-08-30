@@ -43,4 +43,20 @@ contextBridge.exposeInMainWorld('mount', {
   saveSettings: (settings: MountSettings): Promise<void> => {
     return ipcRenderer.invoke('save-settings', settings);
   },
+
+  /** Get the current platform: 'darwin' | 'win32' | 'linux'. */
+  getPlatform: (): Promise<string> => {
+    return ipcRenderer.invoke('get-platform');
+  },
+
+  /** Check if macOS Accessibility permission is granted. Always returns true on non-macOS. */
+  checkAccessibility: (): Promise<boolean> => {
+    return ipcRenderer.invoke('check-accessibility');
+  },
+
+  /** Request macOS Accessibility permission (opens system dialog). Always returns true on non-macOS. */
+  requestAccessibility: (): Promise<boolean> => {
+    return ipcRenderer.invoke('request-accessibility');
+  },
 });
+

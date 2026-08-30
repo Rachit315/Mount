@@ -22,10 +22,19 @@ Thanks for your interest in contributing to Mount! 🎉
    ```
    This launches the Next.js dev server and Electron concurrently.
 
+### macOS-Specific Setup
+
+On macOS, `uiohook-napi` requires **Accessibility permission** to capture global keystrokes:
+
+1. When you first run `npm run dev`, macOS will prompt you to grant Accessibility access
+2. Go to **System Settings → Privacy & Security → Accessibility**
+3. Enable the toggle for **Electron** (during development) or **Mount** (packaged app)
+4. You may need to restart the app after granting permission
+
 ## Project Architecture
 
 - **`electron/`** — Main process code (TypeScript, compiled to CommonJS)
-  - `main.ts` — App lifecycle, tray, window management, IPC
+  - `main.ts` — App lifecycle, tray, window management, IPC, cross-platform handling
   - `preload.ts` — Context bridge for secure renderer ↔ main communication
   - `keyboard-hook.ts` — Global keystroke capture via uiohook-napi
   - `settings.ts` — JSON file persistence
@@ -34,6 +43,21 @@ Thanks for your interest in contributing to Mount! 🎉
   - `lib/audio-engine.ts` — Core Web Audio synthesis engine
   - `lib/switch-profiles.ts` — Switch profile parameter definitions
   - `components/` — React UI components
+
+## Cross-Platform Notes
+
+Mount supports both **Windows** and **macOS**. When contributing, keep these differences in mind:
+
+| Concern | Windows | macOS |
+|---------|---------|-------|
+| Tray location | System tray (bottom-right) | Menu bar (top-right) |
+| Dock/taskbar | `skipTaskbar: true` | `app.dock.hide()` |
+| Shortcut label | `Ctrl+Shift+K` | `⌘+Shift+K` |
+| Key capture | Win32 hooks (automatic) | Accessibility permission required |
+| Tray icon | 24×24 RGBA | 18×18 template image |
+| App icon | `.ico` (auto-converted) | `.icns` (auto-converted from PNG) |
+
+Use `process.platform === 'darwin'` checks in Electron code and `navigator.userAgent` detection (or the `window.mount.getPlatform()` API) in renderer code.
 
 ## Adding a New Switch Profile
 
@@ -64,8 +88,10 @@ Use conventional commits:
 1. Fork the repo and create a feature branch
 2. Make your changes
 3. Test in both dev mode and production build
-4. Submit a PR with a clear description
+4. Test on both platforms if possible (or note which platform you tested on)
+5. Submit a PR with a clear description
 
 ## License
 
 By contributing, you agree that your contributions will be licensed under the MIT License.
+

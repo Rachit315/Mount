@@ -19,6 +19,9 @@ export interface MountAPI {
   setEnabled: (enabled: boolean) => void;
   getSettings: () => Promise<MountSettings>;
   saveSettings: (settings: MountSettings) => Promise<void>;
+  getPlatform: () => Promise<string>;
+  checkAccessibility: () => Promise<boolean>;
+  requestAccessibility: () => Promise<boolean>;
 }
 
 declare global {
@@ -26,3 +29,4 @@ declare global {
     mount?: MountAPI;
   }
 }
+

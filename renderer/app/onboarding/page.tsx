@@ -1,15 +1,30 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
 import { useKeyboardEvents } from '../../lib/use-keyboard-events';
 import { getProfileById } from '../../lib/switch-profiles';
 import { LogoIcon } from '../../components/LogoIcon';
 
+function detectIsMac(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  return /mac|darwin/i.test(navigator.userAgent);
+}
+
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [testCount, setTestCount] = useState(0);
+  const [isMac, setIsMac] = useState(false);
+
+  useEffect(() => {
+    // Prefer Electron's platform API if available
+    if (window.mount?.getPlatform) {
+      window.mount.getPlatform().then((p) => setIsMac(p === 'darwin'));
+    } else {
+      setIsMac(detectIsMac());
+    }
+  }, []);
 
   const { keystrokeCount } = useKeyboardEvents({
     enabled: true,
@@ -17,6 +32,7 @@ export default function OnboardingPage() {
   });
 
   const profile = getProfileById('alpaca');
+  const shortcutKey = isMac ? '⌘+Shift+K' : 'Ctrl+Shift+K';
 
   return (
     <div className="min-h-screen bg-[#000000] flex flex-col items-center justify-center p-6 text-[#FFFFFF] select-none font-mono relative overflow-hidden">
@@ -59,7 +75,7 @@ export default function OnboardingPage() {
 
               <h1 className="text-xl font-bold text-[#FFFFFF] mb-2 font-mono">Welcome to Mount</h1>
               <p className="text-xs text-[#A1A1AA] mb-6 leading-relaxed">
-                Experience authentic mechanical keyboard sounds while typing anywhere on your PC. 13 hardware switch packs, spatial audio, and 100% offline.
+                Experience authentic mechanical keyboard sounds while typing anywhere on your {isMac ? 'Mac' : 'PC'}. 13 hardware switch packs, spatial audio, and 100% offline.
               </p>
 
               <button
@@ -133,7 +149,7 @@ export default function OnboardingPage() {
 
               <h2 className="text-lg font-bold text-[#FFFFFF] mb-2 font-mono">System Ready</h2>
               <p className="text-xs text-[#A1A1AA] mb-4 leading-relaxed">
-                Mount is running in your system tray. Press <kbd className="px-1.5 py-0.5 rounded-[2px] bg-[#111113] border border-[#27272A] text-[#00AFFF] font-mono text-[10px]">Ctrl+Shift+K</kbd> to toggle the popover at any time.
+                Mount is running in your {isMac ? 'menu bar' : 'system tray'}. Press <kbd className="px-1.5 py-0.5 rounded-[2px] bg-[#111113] border border-[#27272A] text-[#00AFFF] font-mono text-[10px]">{shortcutKey}</kbd> to toggle the popover at any time.
               </p>
 
               <Link
@@ -149,3 +165,4 @@ export default function OnboardingPage() {
     </div>
   );
 }
+

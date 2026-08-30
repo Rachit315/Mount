@@ -42,6 +42,19 @@ export function LandingNavbar({ onOpenDownload }: LandingNavbarProps) {
 
         {/* Actions */}
         <div className="flex items-center gap-3">
+          {/* GitHub Star */}
+          <a
+            href="https://github.com/Rachit315/Mount"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden sm:inline-flex items-center gap-1.5 font-mono text-[12px] text-[#A1A1AA] hover:text-[#FFFFFF] px-3 py-1.5 rounded-[2px] bg-[#18181B] border border-[#27272A] hover:border-[#3F3F46] transition-all"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+            <span>STAR ON GITHUB</span>
+          </a>
+
           <Link
             href="/app"
             className="hidden sm:inline-flex items-center font-mono text-[12px] text-[#A1A1AA] hover:text-[#FFFFFF] px-3 py-1.5 rounded-[2px] bg-[#18181B] border border-[#27272A] hover:border-[#3F3F46] transition-all"
@@ -75,3 +88,4 @@ export function LandingNavbar({ onOpenDownload }: LandingNavbarProps) {
     </header>
   );
 }
+

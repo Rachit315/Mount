@@ -3,10 +3,10 @@
 const features = [
   {
     code: '01 // HOOK',
-    title: 'Sub-10ms Win32 Keyboard Hook',
+    title: 'Sub-10ms Native Keyboard Hook',
     description:
-      'Low-level Windows event hooks through uiohook-napi capture keystrokes system-wide with zero perceptible input lag.',
-    badge: 'WIN32_HOOK',
+      'Low-level native OS event hooks through uiohook-napi capture keystrokes system-wide with zero perceptible input lag.',
+    badge: 'NATIVE_HOOK',
   },
   {
     code: '02 // SPATIAL',
@@ -33,7 +33,7 @@ const features = [
     code: '05 // DAEMON',
     title: 'System Tray Daemon & Hotkey',
     description:
-      'Runs unobtrusively in the Windows notification area. Toggle window visibility instantly with Ctrl+Shift+K.',
+      'Runs unobtrusively in your system tray (Windows) or menu bar (macOS). Toggle window visibility instantly with Ctrl+Shift+K / ⌘+Shift+K.',
     badge: 'TRAY_DAEMON',
   },
   {

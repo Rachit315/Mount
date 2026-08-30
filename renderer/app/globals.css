@@ -1,0 +1,250 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Neuform "Vortex System" Design Token System (#00AFFF Edition) ─ */
+:root {
+  /* Colors */
+  --primary: #00AFFF;
+  --secondary: #000000;
+  --accent: #00AFFF;
+  --background: #000000;
+  --surface: #18181B;
+  --surface-elevated: #27272A;
+  --surface-recessed: #111113;
+  --border: #27272A;
+  --border-muted: rgba(255, 255, 255, 0.08);
+  --border-active: #00AFFF;
+  
+  /* Text */
+  --text-primary: #FFFFFF;
+  --text-secondary: #A1A1AA;
+  --text-muted: #71717A;
+  --text-dim: #52525B;
+
+  /* Typography */
+  --font-display: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono-code: var(--font-mono), 'JetBrains Mono', monospace;
+
+  /* Radii Scale (Sharp Brutalist Neuform: 2px - 4px) */
+  --radius-card: 2px;
+  --radius-control: 2px;
+  --radius-badge: 2px;
+  --radius-pill: 9999px;
+
+  /* Glows & Shadows */
+  --glow-primary: 0 0 20px rgba(0, 175, 255, 0.25);
+  --glow-primary-subtle: 0 0 12px rgba(0, 175, 255, 0.15);
+  --shadow-card: 0 0 0 1px #27272A, 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+/* ── Base Resets ───────────────────────────────────────────────────── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background-color: #000000;
+  color: #FFFFFF;
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100%;
+  overflow-x: hidden;
+  background-color: #000000;
+}
+
+.font-mono {
+  font-family: var(--font-mono-code);
+}
+
+/* ── Typography Scale ──────────────────────────────────────────────── */
+.display-lg {
+  font-family: var(--font-display);
+  font-size: clamp(38px, 6vw, 64px);
+  font-weight: 500;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+}
+
+.display-md {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 36px);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.body-md {
+  font-family: var(--font-mono-code);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.label-md {
+  font-family: var(--font-mono-code);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Neuform Vortex Components ─────────────────────────────────────── */
+.vortex-card {
+  background-color: #18181B;
+  border: 1px solid #27272A;
+  border-radius: var(--radius-card);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vortex-card:hover {
+  border-color: #3F3F46;
+  box-shadow: 0 0 0 1px #3F3F46, 0 12px 32px rgba(0, 0, 0, 0.7);
+}
+
+.vortex-card-active {
+  border-color: #00AFFF;
+  box-shadow: 0 0 0 1px #00AFFF, 0 0 20px rgba(0, 175, 255, 0.15);
+}
+
+.vortex-btn-primary {
+  background-color: #00AFFF;
+  color: #000000;
+  font-family: var(--font-mono-code);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  height: 42px;
+  border-radius: var(--radius-control);
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #00AFFF;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  box-shadow: 0 0 18px rgba(0, 175, 255, 0.35);
+}
+
+.vortex-btn-primary:hover {
+  background-color: #33BFFF;
+  box-shadow: 0 0 26px rgba(0, 175, 255, 0.55);
+  transform: translateY(-1px);
+}
+
+.vortex-btn-ghost {
+  background-color: transparent;
+  color: #A1A1AA;
+  font-family: var(--font-mono-code);
+  font-weight: 500;
+  font-size: 13px;
+  height: 42px;
+  border-radius: var(--radius-control);
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #27272A;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.vortex-btn-ghost:hover {
+  background-color: #18181B;
+  border-color: #3F3F46;
+  color: #FFFFFF;
+}
+
+.vortex-badge {
+  font-family: var(--font-mono-code);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--radius-badge);
+  background-color: #18181B;
+  border: 1px solid #27272A;
+  color: #A1A1AA;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vortex-badge-active {
+  background-color: rgba(0, 175, 255, 0.08);
+  border-color: rgba(0, 175, 255, 0.4);
+  color: #00AFFF;
+}
+
+/* ── Technical Grid Overlay ────────────────────────────────────────── */
+.vortex-grid-bg {
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.vortex-dither {
+  background-image: radial-gradient(rgba(0, 175, 255, 0.12) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* ── Custom Range Slider ───────────────────────────────────────────── */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 0;
+  height: 0;
+}
+
+/* ── Scrollbars ────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272A;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00AFFF;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #27272A;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

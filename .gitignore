@@ -1,0 +1,11 @@
+node_modules/
+dist/
+release/
+renderer/out/
+renderer/.next/
+renderer/node_modules/
+renderer/public/downloads/
+*.zip
+*.log
+.DS_Store
+Thumbs.db

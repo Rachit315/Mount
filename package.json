@@ -1,0 +1,51 @@
+{
+  "name": "mount",
+  "version": "1.0.0",
+  "description": "Real mechanical keyboard sounds for your PC. Open source.",
+  "main": "dist/electron/main.js",
+  "author": "Mount Contributors",
+  "license": "MIT",
+  "scripts": {
+    "dev": "concurrently -k -n renderer,electron -c blue,green \"npm run dev:renderer\" \"npm run dev:electron\"",
+    "dev:renderer": "npm --prefix renderer run dev",
+    "dev:electron": "wait-on http://localhost:3000 && electron .",
+    "build:electron": "tsc",
+    "build:renderer": "npm --prefix renderer run build",
+    "build": "npm run build:renderer && npm run build:electron",
+    "dist": "npm run build && electron-builder --win --dir",
+    "postinstall": "npm --prefix renderer install"
+  },
+  "dependencies": {
+    "uiohook-napi": "^1.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "concurrently": "^9.1.0",
+    "electron": "^31.6.0",
+    "electron-builder": "^25.1.0",
+    "typescript": "^5.6.0",
+    "wait-on": "^8.0.0"
+  },
+  "build": {
+    "npmRebuild": false,
+    "nodeGypRebuild": false,
+    "forceCodeSigning": false,
+    "appId": "com.mount.keyboard",
+    "productName": "Mount",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/electron/**/*",
+      "renderer/out/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "node_modules/uiohook-napi/**/*"
+    ],
+    "win": {
+      "target": ["dir"]
+    }
+  }
+}

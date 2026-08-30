@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { LogoIcon } from './LogoIcon';
 
-const DOWNLOAD_ZIP_URL = '/downloads/Mount-Windows-x64.zip';
+const DOWNLOAD_ZIP_URL = 'https://github.com/Rachit315/Mount/releases/download/v1.0.0/Mount-Windows-x64.zip';
 const GITHUB_RELEASES_PAGE = 'https://github.com/Rachit315/Mount/releases';
 const CLONE_COMMAND = 'git clone https://github.com/Rachit315/Mount.git && cd Mount && npm install && npm run dev';
 
@@ -97,7 +97,6 @@ export function LandingDownloadModal({ isOpen, onClose }: LandingDownloadModalPr
         <div className="flex flex-wrap items-center gap-3">
           <a
             href={DOWNLOAD_ZIP_URL}
-            download="Mount-Windows-x64.zip"
             className="vortex-btn-primary flex-1 h-10 text-[12px] flex items-center justify-center gap-2"
           >
             <svg

@@ -3,19 +3,18 @@
 import Link from 'next/link';
 import { AudioVisualizerWave } from './AudioVisualizerWave';
 
+const GITHUB_RELEASE_DOWNLOAD_URL = 'https://github.com/Rachit315/Mount/releases/latest/download/Mount-Windows-x64.zip';
+
 interface LandingHeroProps {
   onOpenDownload: () => void;
 }
 
 export function LandingHero({ onOpenDownload }: LandingHeroProps) {
-  const triggerDirectDownload = () => {
-    const link = document.createElement('a');
-    link.href = '/downloads/Mount-Windows-x64.zip';
-    link.download = 'Mount-Windows-x64.zip';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const triggerDownload = () => {
     onOpenDownload();
+    if (typeof window !== 'undefined') {
+      window.open(GITHUB_RELEASE_DOWNLOAD_URL, '_blank');
+    }
   };
 
   return (
@@ -46,7 +45,7 @@ export function LandingHero({ onOpenDownload }: LandingHeroProps) {
       {/* Action Buttons */}
       <div className="flex flex-wrap items-center justify-center gap-4 mb-20">
         <button
-          onClick={triggerDirectDownload}
+          onClick={triggerDownload}
           className="vortex-btn-primary h-12 px-6 text-[13px]"
         >
           <svg

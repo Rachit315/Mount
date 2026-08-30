@@ -6,8 +6,8 @@ Thanks for your interest in contributing to Mount! 🎉
 
 1. **Clone the repo**
    ```bash
-   git clone https://github.com/your-org/mount.git
-   cd mount
+   git clone https://github.com/Rachit315/Mount.git
+   cd Mount
    ```
 
 2. **Install dependencies**

@@ -1,21 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { LogoIcon } from './LogoIcon';
 
 const DOWNLOAD_WINDOWS_URL = 'https://github.com/Rachit315/Mount/releases/latest/download/Mount-Windows-x64.zip';
-const DOWNLOAD_MACOS_URL = 'https://github.com/Rachit315/Mount/releases/latest/download/Mount-macOS-arm64.zip';
 const GITHUB_RELEASES_PAGE = 'https://github.com/Rachit315/Mount/releases';
 const CLONE_COMMAND = 'git clone https://github.com/Rachit315/Mount.git && cd Mount && npm install && npm run dev';
-
-type Platform = 'windows' | 'macos';
-
-function detectPlatform(): Platform {
-  if (typeof navigator === 'undefined') return 'windows';
-  const ua = navigator.userAgent.toLowerCase();
-  if (ua.includes('mac') || ua.includes('darwin')) return 'macos';
-  return 'windows';
-}
 
 interface LandingDownloadModalProps {
   isOpen: boolean;
@@ -24,11 +14,6 @@ interface LandingDownloadModalProps {
 
 export function LandingDownloadModal({ isOpen, onClose }: LandingDownloadModalProps) {
   const [copied, setCopied] = useState(false);
-  const [platform, setPlatform] = useState<Platform>('windows');
-
-  useEffect(() => {
-    setPlatform(detectPlatform());
-  }, []);
 
   if (!isOpen) return null;
 
@@ -37,16 +22,6 @@ export function LandingDownloadModal({ isOpen, onClose }: LandingDownloadModalPr
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
-  const isWin = platform === 'windows';
-  const downloadUrl = isWin ? DOWNLOAD_WINDOWS_URL : DOWNLOAD_MACOS_URL;
-  const platformLabel = isWin ? 'Windows x64 Portable' : 'macOS (Apple Silicon)';
-  const archiveLabel = isWin ? 'Mount-Windows-x64.zip' : 'Mount-macOS-arm64.zip';
-  const executableName = isWin ? 'Mount.exe' : 'Mount.app';
-  const extractVerb = isWin ? 'Extract the zip archive to any folder on your PC' : 'Extract the zip and drag Mount to your Applications folder';
-  const launchVerb = isWin
-    ? <>Launch <strong className="text-[#FFFFFF]">Mount.exe</strong> to start global acoustic capture</>
-    : <>Open <strong className="text-[#FFFFFF]">Mount.app</strong> and grant Accessibility permission when prompted</>;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
@@ -60,7 +35,7 @@ export function LandingDownloadModal({ isOpen, onClose }: LandingDownloadModalPr
                 // MOUNT_STANDALONE_RELEASE
               </h3>
               <p className="text-[11px] font-mono text-[#00AFFF]">
-                v1.0.0 &bull; {platformLabel}
+                v1.0.0 &bull; Windows x64 Portable (.ZIP)
               </p>
             </div>
           </div>
@@ -73,35 +48,9 @@ export function LandingDownloadModal({ isOpen, onClose }: LandingDownloadModalPr
           </button>
         </div>
 
-        {/* Platform Tabs */}
-        <div className="flex gap-1 mb-4">
-          <button
-            onClick={() => setPlatform('windows')}
-            className={`flex-1 py-1.5 text-[11px] font-mono rounded-[2px] border transition-all cursor-pointer ${
-              isWin
-                ? 'bg-[#00AFFF]/10 border-[#00AFFF]/30 text-[#00AFFF]'
-                : 'bg-[#111113] border-[#27272A] text-[#71717A] hover:text-[#A1A1AA]'
-            }`}
-          >
-            ⊞ WINDOWS
-          </button>
-          <button
-            onClick={() => setPlatform('macos')}
-            className={`flex-1 py-1.5 text-[11px] font-mono rounded-[2px] border transition-all cursor-pointer ${
-              !isWin
-                ? 'bg-[#00AFFF]/10 border-[#00AFFF]/30 text-[#00AFFF]'
-                : 'bg-[#111113] border-[#27272A] text-[#71717A] hover:text-[#A1A1AA]'
-            }`}
-          >
-             macOS
-          </button>
-        </div>
-
         {/* Content */}
         <p className="text-[12px] font-mono text-[#A1A1AA] mb-4 leading-relaxed">
-          {isWin
-            ? 'Standalone executable bundle with precompiled native Win32 keyboard drivers. 100% offline with zero installation setup.'
-            : 'Native macOS menu bar app with Accessibility-based keyboard capture. 100% offline with zero installation setup.'}
+          Standalone executable bundle with precompiled native Win32 keyboard drivers. 100% offline with zero installation setup.
         </p>
 
         {/* 3 Step Setup Guide */}
@@ -109,19 +58,19 @@ export function LandingDownloadModal({ isOpen, onClose }: LandingDownloadModalPr
           <div className="flex items-start gap-3">
             <span className="text-[#00AFFF] font-bold">01 //</span>
             <p className="text-[#A1A1AA]">
-              Download <code className="text-[#FFFFFF] bg-[#18181B] border border-[#27272A] px-1.5 py-0.5 rounded-[2px]">{archiveLabel}</code>
+              Download <code className="text-[#FFFFFF] bg-[#18181B] border border-[#27272A] px-1.5 py-0.5 rounded-[2px]">Mount-Windows-x64.zip</code>
             </p>
           </div>
           <div className="flex items-start gap-3">
             <span className="text-[#00AFFF] font-bold">02 //</span>
             <p className="text-[#A1A1AA]">
-              {extractVerb}
+              Extract the zip archive to any folder on your PC
             </p>
           </div>
           <div className="flex items-start gap-3">
             <span className="text-[#00AFFF] font-bold">03 //</span>
             <p className="text-[#A1A1AA]">
-              {launchVerb}
+              Launch <strong className="text-[#FFFFFF]">Mount.exe</strong> to start global acoustic capture
             </p>
           </div>
         </div>
@@ -147,7 +96,8 @@ export function LandingDownloadModal({ isOpen, onClose }: LandingDownloadModalPr
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-3">
           <a
-            href={downloadUrl}
+            href={DOWNLOAD_WINDOWS_URL}
+            download="Mount-Windows-x64.zip"
             className="vortex-btn-primary flex-1 h-10 text-[12px] flex items-center justify-center gap-2"
           >
             <svg
@@ -164,7 +114,7 @@ export function LandingDownloadModal({ isOpen, onClose }: LandingDownloadModalPr
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
-            <span>DOWNLOAD .ZIP</span>
+            <span>DOWNLOAD FOR WINDOWS (.ZIP)</span>
           </a>
 
           <a
@@ -188,4 +138,5 @@ export function LandingDownloadModal({ isOpen, onClose }: LandingDownloadModalPr
     </div>
   );
 }
+
 

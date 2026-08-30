@@ -12,6 +12,7 @@ import {
   shell,
 } from 'electron';
 import * as path from 'path';
+import * as fs from 'fs';
 import { setupKeyboardHook, setKeyboardEnabled, stopKeyboardHook } from './keyboard-hook';
 import { getSettings, saveSettings } from './settings';
 
@@ -37,8 +38,33 @@ let tray: Tray | null = null;
 let mainWindow: BrowserWindow | null = null;
 let isQuitting = false;
 
+// ── Resolve crisp Logo icon ─────────────────────────────────────────────
+function getAppIcon(): Electron.NativeImage {
+  const possiblePaths = [
+    path.join(__dirname, '..', '..', 'assets', 'icon.png'),
+    path.join(__dirname, '..', 'assets', 'icon.png'),
+    path.join(process.resourcesPath, 'assets', 'icon.png'),
+    path.join(process.resourcesPath, 'app.asar.unpacked', 'assets', 'icon.png'),
+    path.join(app.getAppPath(), 'assets', 'icon.png'),
+  ];
+
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) {
+      const img = nativeImage.createFromPath(p);
+      if (!img.isEmpty()) {
+        return img;
+      }
+    }
+  }
+
+  // Safe fallback
+  return nativeImage.createEmpty();
+}
+
 // ── Window ──────────────────────────────────────────────────────────────
 function createWindow(): void {
+  const icon = getAppIcon();
+
   mainWindow = new BrowserWindow({
     width: 420,
     height: 700,
@@ -46,7 +72,8 @@ function createWindow(): void {
     frame: false,
     resizable: false,
     skipTaskbar: true,
-    backgroundColor: '#0c0a1a',
+    icon: icon.isEmpty() ? undefined : icon,
+    backgroundColor: '#000000',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -79,12 +106,11 @@ function createWindow(): void {
 
 // ── Tray ────────────────────────────────────────────────────────────────
 function createTray(): void {
-  const iconPath = isProd
-    ? path.join(process.resourcesPath, 'assets', 'icon.png')
-    : path.join(app.getAppPath(), 'assets', 'icon.png');
-
-  const icon = nativeImage.createFromPath(iconPath);
-  tray = new Tray(icon.resize({ width: 16, height: 16 }));
+  const appIcon = getAppIcon();
+  
+  // Tray icon resized cleanly for high-DPI Windows tray
+  const trayIcon = appIcon.resize({ width: 24, height: 24 });
+  tray = new Tray(trayIcon);
   tray.setToolTip('Mount — Mechanical Keyboard Sounds');
 
   // Left-click toggles the popover

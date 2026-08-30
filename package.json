@@ -11,7 +11,7 @@
     "dev:electron": "npx wait-on http://localhost:3000 && electron .",
     "build:electron": "tsc",
     "build:renderer": "npm --prefix renderer run build",
-    "build": "npm run build:renderer && npm run build:electron",
+    "build": "npm run build:renderer && node -e \"if (!process.env.VERCEL) { const { execSync } = require('child_process'); execSync('npm run build:electron', { stdio: 'inherit' }); }\"",
     "dist": "npm run build && electron-builder --win --dir -c.win.signAndEditExecutable=false",
     "dist:mac": "npm run build && electron-builder --mac --dir",
     "dist:all": "npm run build && electron-builder --win --mac --dir -c.win.signAndEditExecutable=false",

@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { LogoIcon } from './LogoIcon';
 
-const DOWNLOAD_WINDOWS_URL = 'https://github.com/Rachit315/Mount/releases/download/v1.0.0/Mount-Windows-x64.zip';
-const DOWNLOAD_MACOS_URL = 'https://github.com/Rachit315/Mount/releases/download/v1.0.0/Mount-macOS-arm64.zip';
+const DOWNLOAD_WINDOWS_URL = 'https://github.com/Rachit315/Mount/releases/latest/download/Mount-Windows-x64.zip';
+const DOWNLOAD_MACOS_URL = 'https://github.com/Rachit315/Mount/releases/latest/download/Mount-macOS-arm64.zip';
 const GITHUB_RELEASES_PAGE = 'https://github.com/Rachit315/Mount/releases';
 const CLONE_COMMAND = 'git clone https://github.com/Rachit315/Mount.git && cd Mount && npm install && npm run dev';
 

@@ -37,7 +37,8 @@ export function LandingHero({ onOpenDownload }: LandingHeroProps) {
       <div className="flex flex-wrap items-center justify-center gap-3 mb-20">
         {/* Windows Download */}
         <a
-          href="https://github.com/Rachit315/Mount/releases/download/v1.0.0/Mount-Windows-x64.zip"
+          href="https://github.com/Rachit315/Mount/releases/latest/download/Mount-Windows-x64.zip"
+          download
           className="vortex-btn-primary h-12 px-6 text-[13px] flex items-center gap-2"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
@@ -50,7 +51,8 @@ export function LandingHero({ onOpenDownload }: LandingHeroProps) {
 
         {/* macOS Download */}
         <a
-          href="https://github.com/Rachit315/Mount/releases/download/v1.0.0/Mount-macOS-arm64.zip"
+          href="https://github.com/Rachit315/Mount/releases/latest/download/Mount-macOS-arm64.zip"
+          download
           className="h-12 px-6 text-[13px] font-mono font-semibold flex items-center gap-2 rounded-[2px] border border-[#00AFFF]/40 text-[#00AFFF] bg-[#00AFFF]/5 hover:bg-[#00AFFF]/15 hover:border-[#00AFFF]/60 transition-all cursor-pointer"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">

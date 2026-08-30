@@ -84,9 +84,14 @@ jobs:
 
       - name: Create Zip Archive
         run: |
-          cd release/mac-arm64
-          zip -r ../../Mount-macOS-arm64.zip Mount.app
-          cd ../..
+          if [ -d "release/mac-arm64" ]; then
+            cd release/mac-arm64 && zip -r ../../Mount-macOS-arm64.zip Mount.app && cd ../..
+          elif [ -d "release/mac" ]; then
+            cd release/mac && zip -r ../../Mount-macOS-arm64.zip Mount.app && cd ../..
+          else
+            echo "Searching for Mount.app..."
+            find release -name "Mount.app" -exec zip -r Mount-macOS-arm64.zip {} +
+          fi
 
       - name: Upload macOS Artifact
         uses: actions/upload-artifact@v4

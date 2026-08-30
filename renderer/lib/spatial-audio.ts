@@ -95,7 +95,7 @@ export const keyWidths: Record<number, number> = {
 
 /**
  * Map browser KeyboardEvent.code → uiohook scan code.
- * Used as a dev-mode fallback when running outside Electron.
+ * Used as a fallback when running outside Electron.
  */
 export const webKeyToScanCode: Record<string, number> = {
   Escape: 1, Digit1: 2, Digit2: 3, Digit3: 4, Digit4: 5,
@@ -110,4 +110,6 @@ export const webKeyToScanCode: Record<string, number> = {
   KeyZ: 44, KeyX: 45, KeyC: 46, KeyV: 47, KeyB: 48,
   KeyN: 49, KeyM: 50, Comma: 51, Period: 52, Slash: 53,
   ShiftRight: 54, AltLeft: 56, Space: 57, CapsLock: 58,
+  ArrowLeft: 30, ArrowUp: 18, ArrowRight: 36, ArrowDown: 46,
+  AltRight: 56, ControlRight: 29, MetaLeft: 29, MetaRight: 29,
 };

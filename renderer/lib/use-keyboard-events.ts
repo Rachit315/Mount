@@ -11,7 +11,7 @@ interface UseKeyboardEventsOptions {
 
 /**
  * React hook that listens for keystroke events (via Electron IPC or
- * browser fallback in dev mode) and plays sounds through the audio engine.
+ * browser fallback in web mode) and plays sounds through the audio engine.
  *
  * Returns live state for the visualizer.
  */
@@ -78,16 +78,18 @@ export function useKeyboardEvents({ enabled, profileId }: UseKeyboardEventsOptio
       return cleanup;
     }
 
-    // ── Browser fallback (dev mode without Electron) ─────────────────
+    // ── Browser fallback (web mode outside Electron) ─────────────────
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.repeat) return;
-      const sc = webKeyToScanCode[e.code];
-      if (sc !== undefined) handleKeyDown(sc);
+      // Auto resume AudioContext on first user interaction in browser
+      audioEngine.initialize();
+      const sc = webKeyToScanCode[e.code] ?? 30;
+      handleKeyDown(sc);
     };
 
     const onKeyUp = (e: KeyboardEvent) => {
-      const sc = webKeyToScanCode[e.code];
-      if (sc !== undefined) handleKeyUp(sc);
+      const sc = webKeyToScanCode[e.code] ?? 30;
+      handleKeyUp(sc);
     };
 
     window.addEventListener('keydown', onKeyDown);

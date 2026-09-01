@@ -9,7 +9,11 @@ on:
 permissions:
   contents: write
 
+env:
+  NODE_VERSION: '22'
+
 jobs:
+  # ── Windows: the build the landing page actually offers ──────────────
   build-windows:
     runs-on: windows-latest
 
@@ -20,39 +24,44 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
+          node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install dependencies
-        run: npm ci
+      # Each package is installed explicitly. The root postinstall no-ops
+      # under CI so no nested npm runs inside this one.
+      - name: Install root dependencies
+        run: npm ci --no-audit --no-fund
 
       - name: Install renderer dependencies
-        run: npm --prefix renderer ci
+        run: npm ci --no-audit --no-fund
+        working-directory: renderer
 
       - name: Build Next.js static export
-        run: npm --prefix renderer run build
+        run: npm run build
+        working-directory: renderer
 
       - name: Build Electron TypeScript
         run: npm run build:electron
 
-      - name: Package Electron App with electron-builder
-        run: npx electron-builder --win --dir
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # --publish never keeps electron-builder from trying to create the
+      # release itself; the release job below owns that.
+      - name: Package Electron app
+        run: npx electron-builder --win --dir --publish never
 
-      - name: Create Zip Archive
+      - name: Create zip archive
         shell: pwsh
-        run: |
-          Compress-Archive -Path "release/win-unpacked/*" -DestinationPath "Mount-Windows-x64.zip" -Force
+        run: Compress-Archive -Path "release/win-unpacked/*" -DestinationPath "Mount-Windows-x64.zip" -Force
 
-      - name: Upload Windows Artifact
+      - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
           name: mount-windows
           path: Mount-Windows-x64.zip
+          if-no-files-found: error
 
+  # ── macOS: best effort. A failure here must not block the release. ───
   build-macos:
     runs-on: macos-latest
+    continue-on-error: true
 
     steps:
       - name: Checkout repository
@@ -61,70 +70,67 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
+          node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install root dependencies
+        run: npm ci --no-audit --no-fund
 
       - name: Install renderer dependencies
-        run: npm --prefix renderer ci
+        run: npm ci --no-audit --no-fund
+        working-directory: renderer
 
       - name: Build Next.js static export
-        run: npm --prefix renderer run build
+        run: npm run build
+        working-directory: renderer
 
       - name: Build Electron TypeScript
         run: npm run build:electron
 
-      - name: Package Electron App with electron-builder
-        run: npx electron-builder --mac --dir
+      - name: Package Electron app
+        run: npx electron-builder --mac --dir --publish never
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: false
 
-      - name: Create Zip Archive
+      - name: Create zip archive
         run: |
-          if [ -d "release/mac-arm64" ]; then
-            cd release/mac-arm64 && zip -r ../../Mount-macOS-arm64.zip Mount.app && cd ../..
-          elif [ -d "release/mac" ]; then
-            cd release/mac && zip -r ../../Mount-macOS-arm64.zip Mount.app && cd ../..
-          else
-            echo "Searching for Mount.app..."
-            find release -name "Mount.app" -exec zip -r Mount-macOS-arm64.zip {} +
+          APP_PATH="$(find release -maxdepth 2 -name 'Mount.app' -print -quit)"
+          if [ -z "$APP_PATH" ]; then
+            echo "Mount.app not found under release/" >&2
+            exit 1
           fi
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" Mount-macOS-arm64.zip
 
-      - name: Upload macOS Artifact
+      - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
         with:
           name: mount-macos
           path: Mount-macOS-arm64.zip
+          if-no-files-found: error
 
+  # ── Publish whatever built. Windows is required, macOS is optional. ──
   release:
     needs: [build-windows, build-macos]
+    if: always() && needs.build-windows.result == 'success'
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
 
     steps:
-      - name: Download Windows Artifact
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: mount-windows
+          path: artifacts
+          merge-multiple: true
 
-      - name: Download macOS Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: mount-macos
+      - name: List what will be published
+        run: ls -lh artifacts
 
-      - name: Create GitHub Release and Upload Assets
+      - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
           name: Mount ${{ github.ref_name }}
-          files: |
-            Mount-Windows-x64.zip
-            Mount-macOS-arm64.zip
+          tag_name: ${{ github.ref_name }}
+          files: artifacts/*.zip
           draft: false
           prerelease: false
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

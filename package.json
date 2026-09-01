@@ -16,7 +16,7 @@
     "dist": "npm run build:all && electron-builder --win --dir -c.win.signAndEditExecutable=false",
     "dist:mac": "npm run build:all && electron-builder --mac --dir",
     "dist:all": "npm run build:all && electron-builder --win --mac --dir -c.win.signAndEditExecutable=false",
-    "postinstall": "npm --prefix renderer install"
+    "postinstall": "node scripts/postinstall.js"
   },
   "dependencies": {
     "uiohook-napi": "^1.5.4"

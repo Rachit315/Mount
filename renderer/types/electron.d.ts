@@ -12,13 +12,15 @@ export interface MountSettings {
   toneX: number;
   pitchY: number;
   selectedProfile: string;
+  /** Lifetime keystrokes, carried across restarts. */
+  keystrokeCount: number;
 }
 
 export interface MountAPI {
   onKeystroke: (callback: (event: KeystrokeEvent) => void) => () => void;
   setEnabled: (enabled: boolean) => void;
   getSettings: () => Promise<MountSettings>;
-  saveSettings: (settings: MountSettings) => Promise<void>;
+  saveSettings: (settings: Partial<MountSettings>) => Promise<void>;
   getPlatform: () => Promise<string>;
   checkAccessibility: () => Promise<boolean>;
   requestAccessibility: () => Promise<boolean>;

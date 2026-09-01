@@ -8,6 +8,8 @@ export interface MountSettings {
   toneX: number;
   pitchY: number;
   selectedProfile: string;
+  /** Lifetime keystrokes, carried across restarts. */
+  keystrokeCount: number;
 }
 
 const defaultSettings: MountSettings = {
@@ -16,6 +18,7 @@ const defaultSettings: MountSettings = {
   toneX: 0.5,
   pitchY: 0.5,
   selectedProfile: 'alpaca',
+  keystrokeCount: 0,
 };
 
 function getSettingsPath(): string {

@@ -86,7 +86,7 @@ export function LandingDownloadModal({
                     Download Mount
                   </h2>
                   <p className="text-[12.5px] text-content-2">
-                    v1.0.0 · Windows x64 portable
+                    v2.0.0 · Windows x64 portable
                   </p>
                 </div>
               </div>

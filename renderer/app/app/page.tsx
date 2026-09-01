@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'motion/react';
 
@@ -28,6 +28,10 @@ export default function AppPage() {
   const [loaded, setLoaded] = useState(false);
   const [isElectron, setIsElectron] = useState(true);
 
+  // Keystrokes counted in previous runs. The hook below only knows about this
+  // session, so the lifetime figure is this plus the session count.
+  const [priorKeystrokes, setPriorKeystrokes] = useState(0);
+
   // ── Keyboard events → audio + visualizer ───────────────────────────
   const { pressedKeys, keystrokeCount } = useKeyboardEvents({
     enabled,
@@ -35,6 +39,11 @@ export default function AppPage() {
   });
 
   const profile = getProfileById(selectedProfile);
+  const totalKeystrokes = priorKeystrokes + keystrokeCount;
+
+  // Read by the persistence timer below without making it re-subscribe.
+  const totalRef = useRef(0);
+  totalRef.current = totalKeystrokes;
 
   // ── Load persisted settings ────────────────────────────────────────
   useEffect(() => {
@@ -46,6 +55,7 @@ export default function AppPage() {
           setVolume(s.volume);
           setToneX(s.toneX);
           setPitchY(s.pitchY);
+          setPriorKeystrokes(s.keystrokeCount ?? 0);
           audioEngine.setVolume(s.volume);
           audioEngine.setTone(s.toneX);
           audioEngine.setPitch(s.pitchY);
@@ -74,6 +84,32 @@ export default function AppPage() {
   useEffect(() => {
     if (loaded) saveSettings();
   }, [saveSettings, loaded]);
+
+  // ── Persist the keystroke counter ──────────────────────────────────
+  // Writing on every keypress would hammer the disk, so flush on a timer and
+  // again when the window goes away. At most a few seconds of typing is lost
+  // if the process is killed outright.
+  useEffect(() => {
+    if (!loaded || typeof window === 'undefined' || !window.mount) return;
+
+    let lastWritten = -1;
+    const flush = () => {
+      if (totalRef.current === lastWritten) return;
+      lastWritten = totalRef.current;
+      window.mount?.saveSettings({ keystrokeCount: totalRef.current });
+    };
+
+    const timer = window.setInterval(flush, 5000);
+    window.addEventListener('pagehide', flush);
+    window.addEventListener('beforeunload', flush);
+
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('pagehide', flush);
+      window.removeEventListener('beforeunload', flush);
+      flush();
+    };
+  }, [loaded]);
 
   // ── Sync enabled state with main process ───────────────────────────
   useEffect(() => {
@@ -181,7 +217,7 @@ export default function AppPage() {
 
       <StatusBar
         profileName={profile?.name || 'Alpaca Linear'}
-        keystrokeCount={keystrokeCount}
+        keystrokeCount={totalKeystrokes}
         enabled={enabled}
       />
     </div>

@@ -12,6 +12,7 @@ export interface MountSettings {
   toneX: number;
   pitchY: number;
   selectedProfile: string;
+  keystrokeCount: number;
 }
 
 contextBridge.exposeInMainWorld('mount', {
@@ -39,8 +40,8 @@ contextBridge.exposeInMainWorld('mount', {
     return ipcRenderer.invoke('get-settings');
   },
 
-  /** Persist settings to disk. */
-  saveSettings: (settings: MountSettings): Promise<void> => {
+  /** Persist settings to disk. Partial updates merge into the saved file. */
+  saveSettings: (settings: Partial<MountSettings>): Promise<void> => {
     return ipcRenderer.invoke('save-settings', settings);
   },
 

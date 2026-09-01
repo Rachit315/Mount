@@ -1,6 +1,8 @@
 'use client';
 
+import { AnimatePresence, motion } from 'motion/react';
 import { LogoIcon } from './LogoIcon';
+import { ThemeToggle } from './ThemeToggle';
 
 interface HeaderProps {
   enabled: boolean;
@@ -9,53 +11,60 @@ interface HeaderProps {
 
 export function Header({ enabled, onToggle }: HeaderProps) {
   return (
-    <div className="flex items-center justify-between px-5 h-14 bg-[#18181B] border-b border-[#27272A]">
-      {/* Brand Identity */}
-      <div className="flex items-center gap-3">
-        <div className="flex-shrink-0">
-          <LogoIcon size={24} />
-        </div>
+    <header className="flex h-[60px] flex-shrink-0 items-center justify-between border-b border-line bg-surface px-4">
+      <div className="flex items-center gap-2.5">
+        <motion.span
+          animate={enabled ? { rotate: [0, -6, 0] } : {}}
+          transition={{ duration: 0.4 }}
+          className="flex"
+        >
+          <LogoIcon size={26} />
+        </motion.span>
 
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[13px] font-mono font-semibold text-[#FFFFFF] tracking-tight">
-              Mount
-            </span>
-            <span className="text-[9px] font-mono text-[#00AFFF] px-1.5 py-0.2 rounded-[2px] bg-[#00AFFF]/10 border border-[#00AFFF]/20">
-              VORTEX
-            </span>
-          </div>
-          <p className="text-[10px] font-mono text-[#71717A] leading-none mt-0.5">
-            {enabled ? '// AUDIO_ENGINE_ACTIVE' : '// SYSTEM_MUTED'}
+          <p className="text-[14px] font-semibold leading-none tracking-[-0.02em] text-content">
+            Mount
           </p>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.p
+              key={enabled ? 'on' : 'off'}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.2 }}
+              className="mt-1 text-[11px] leading-none text-content-2"
+            >
+              {enabled ? 'Listening' : 'Muted'}
+            </motion.p>
+          </AnimatePresence>
         </div>
       </div>
 
-      {/* Recessed Toggle Switch */}
-      <div className="flex items-center gap-2.5">
-        <span
-          className="w-2 h-2 rounded-full transition-colors duration-150"
-          style={{ backgroundColor: enabled ? '#00AFFF' : '#52525B' }}
-        />
+      <div className="flex items-center gap-2">
+        <ThemeToggle size={32} />
+
+        {/* Power switch */}
         <button
           onClick={() => onToggle(!enabled)}
-          aria-label={enabled ? 'Disable audio engine' : 'Enable audio engine'}
-          className="relative w-9 h-5 rounded-full transition-colors duration-150 focus-visible:outline-none cursor-pointer border"
+          aria-label={enabled ? 'Mute Mount' : 'Unmute Mount'}
+          aria-pressed={enabled}
+          className="relative h-[26px] w-[46px] flex-shrink-0 cursor-pointer rounded-full border"
           style={{
-            backgroundColor: enabled ? '#00AFFF' : '#27272A',
-            borderColor: enabled ? '#00AFFF' : '#3F3F46',
-            boxShadow: enabled ? '0 0 10px rgba(0, 175, 255, 0.4)' : 'none',
+            backgroundColor: enabled ? 'var(--accent)' : 'var(--surface-3)',
+            borderColor: enabled ? 'var(--accent)' : 'var(--border-strong)',
+            transition:
+              'background-color 0.25s var(--ease-out), border-color 0.25s var(--ease-out)',
           }}
         >
-          <div
-            className="absolute top-0.5 w-3.5 h-3.5 rounded-full transition-transform duration-150"
-            style={{
-              backgroundColor: enabled ? '#000000' : '#A1A1AA',
-              transform: enabled ? 'translateX(18px)' : 'translateX(2px)',
-            }}
+          <motion.span
+            className="absolute top-[2px] block h-[20px] w-[20px] rounded-full bg-surface"
+            style={{ boxShadow: 'var(--shadow-sm)' }}
+            initial={false}
+            animate={{ x: enabled ? 22 : 2 }}
+            transition={{ type: 'spring', stiffness: 520, damping: 32 }}
           />
         </button>
       </div>
-    </div>
+    </header>
   );
 }

@@ -1,154 +1,241 @@
 'use client';
 
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { switchProfiles, SwitchType } from '@/lib/switch-profiles';
 import { audioEngine } from '@/lib/audio-engine';
+import { useSoundSession } from '@/lib/sound-session';
+import { SectionHeading } from './SectionHeading';
+
+const TABS = ['all', 'linear', 'tactile', 'clicky'] as const;
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 export function LandingSwitches() {
+  const { profileId, setProfileId } = useSoundSession();
   const [filter, setFilter] = useState<'all' | SwitchType>('all');
   const [auditioningId, setAuditioningId] = useState<string | null>(null);
 
-  const filteredProfiles = filter === 'all'
-    ? switchProfiles
-    : switchProfiles.filter((p) => p.type === filter);
+  const filteredProfiles =
+    filter === 'all'
+      ? switchProfiles
+      : switchProfiles.filter((p) => p.type === filter);
 
-  const handleAudition = (profileId: string) => {
-    setAuditioningId(profileId);
-    audioEngine.playKeystroke(30, 'press', profileId);
-    setTimeout(() => {
-      audioEngine.playKeystroke(30, 'release', profileId);
-      setTimeout(() => setAuditioningId(null), 200);
+  const handleAudition = (id: string) => {
+    setAuditioningId(id);
+    setProfileId(id);
+    window.setTimeout(() => {
+      audioEngine.playKeystroke(30, 'release', id);
+      window.setTimeout(() => setAuditioningId(null), 220);
     }, 120);
   };
 
   return (
-    <section id="switches" className="py-20 px-6 max-w-[1240px] mx-auto relative z-10">
-      {/* Section Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
-        <div>
-          <div className="inline-flex items-center gap-2 text-[11px] font-mono text-[#00AFFF] mb-2 uppercase">
-            <span>[ MODULE // 02 ]</span>
-            <span>&bull;</span>
-            <span>Hardware Switch Matrix</span>
+    <section
+      id="switches"
+      className="relative z-10 mx-auto max-w-shell px-5 py-24 sm:px-6"
+    >
+      <SectionHeading
+        eyebrow="The library"
+        title="Thirteen boards, sampled from the real thing"
+        description="Each pack carries row-accurate downstrokes plus its own release tail, so held keys and quick taps don't sound the same."
+        trailing={
+          <div className="segment w-full sm:w-auto">
+            {TABS.map((tab) => {
+              const isActive = filter === tab;
+              const count =
+                tab === 'all'
+                  ? switchProfiles.length
+                  : switchProfiles.filter((p) => p.type === tab).length;
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setFilter(tab)}
+                  data-active={isActive}
+                  className="segment-item capitalize"
+                >
+                  {isActive && (
+                    <motion.span
+                      layoutId="switches-tab"
+                      className="absolute inset-0 rounded-[6px] bg-surface shadow-xs"
+                      transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                    />
+                  )}
+                  <span className="relative z-10">
+                    {tab} <span className="tabular-nums opacity-50">{count}</span>
+                  </span>
+                </button>
+              );
+            })}
           </div>
-          <h3 className="display-md text-[#FFFFFF]">
-            13 Sampled Hardware Switch Packs
-          </h3>
-          <p className="body-md text-[#A1A1AA] text-sm mt-1 max-w-xl">
-            High-fidelity recordings capturing row-accurate downstrokes and return release acoustics.
-          </p>
-        </div>
+        }
+      />
 
-        {/* Filter Tabs */}
-        <div className="flex items-center gap-1 p-1 bg-[#18181B] rounded-[2px] border border-[#27272A] self-start sm:self-auto">
-          {(['all', 'linear', 'tactile', 'clicky'] as const).map((tab) => {
-            const isActive = filter === tab;
-            const count = tab === 'all'
-              ? switchProfiles.length
-              : switchProfiles.filter((p) => p.type === tab).length;
+      <motion.div
+        layout
+        className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
+      >
+        <AnimatePresence mode="popLayout">
+          {filteredProfiles.map((p, i) => {
+            const isAuditioning = auditioningId === p.id;
+            const isActive = profileId === p.id;
 
             return (
-              <button
-                key={tab}
-                onClick={() => setFilter(tab)}
-                className={`py-1.5 px-3 text-[11px] font-mono font-semibold rounded-[2px] uppercase transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-[#00AFFF] text-[#000000] shadow-sm font-bold'
-                    : 'text-[#A1A1AA] hover:text-[#FFFFFF] hover:bg-white/[0.04]'
-                }`}
+              <motion.article
+                key={p.id}
+                layout
+                initial={{ opacity: 0, y: 22, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.97 }}
+                transition={{ duration: 0.45, ease: EASE, delay: (i % 6) * 0.04 }}
+                whileHover={{ y: -4 }}
+                className="card flex flex-col justify-between p-5"
+                style={{
+                  borderColor: isActive ? 'var(--accent-line)' : undefined,
+                  boxShadow: isAuditioning
+                    ? '0 0 0 3px var(--accent-soft), var(--shadow-lg)'
+                    : undefined,
+                }}
               >
-                {tab} [{count}]
-              </button>
+                <div>
+                  <div className="mb-3.5 flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      {/* Miniature switch stem */}
+                      <span
+                        className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md"
+                        style={{
+                          background:
+                            'linear-gradient(180deg, var(--cap-alpha-top), var(--cap-alpha-side))',
+                          boxShadow: 'var(--shadow-xs)',
+                        }}
+                      >
+                        <motion.span
+                          className="h-3.5 w-3.5 rounded-[3px]"
+                          style={{ backgroundColor: p.color }}
+                          animate={
+                            isAuditioning ? { scale: [1, 0.78, 1] } : { scale: 1 }
+                          }
+                          transition={{ duration: 0.3 }}
+                        />
+                      </span>
+
+                      <div className="min-w-0">
+                        <h3 className="truncate text-[15px] font-semibold tracking-[-0.015em] text-content">
+                          {p.name}
+                        </h3>
+                        <p className="text-[12px] text-content-3">{p.brand}</p>
+                      </div>
+                    </div>
+
+                    <span className="badge capitalize">{p.type}</span>
+                  </div>
+
+                  <p className="mb-4 text-[13px] leading-relaxed text-content-2">
+                    {p.description}
+                  </p>
+
+                  <dl className="card-inset mb-4 space-y-2 p-3 font-mono text-[11.5px]">
+                    <Row label="Force" value={`${p.actuation} → ${p.bottomOut}`} />
+                    <Row label="Character" value={p.tag} accent />
+                    <Row
+                      label="Samples"
+                      value={`${p.files.press.length} press · ${p.files.release.length} release`}
+                    />
+                  </dl>
+                </div>
+
+                <motion.button
+                  onClick={() => handleAudition(p.id)}
+                  whileTap={{ scale: 0.97 }}
+                  className={`btn btn-sm w-full ${
+                    isAuditioning ? 'btn-accent' : 'btn-ghost'
+                  }`}
+                >
+                  <AnimatePresence mode="wait" initial={false}>
+                    {isAuditioning ? (
+                      <motion.span
+                        key="playing"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="flex items-center gap-2"
+                      >
+                        <SoundBars />
+                        Playing
+                      </motion.span>
+                    ) : (
+                      <motion.span
+                        key="idle"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="flex items-center gap-2"
+                      >
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.1"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                        </svg>
+                        {isActive ? 'Selected — hear it again' : 'Hear it'}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+              </motion.article>
             );
           })}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredProfiles.map((p) => {
-          const isAuditioning = auditioningId === p.id;
-          return (
-            <div
-              key={p.id}
-              className={`p-5 rounded-[2px] bg-[#18181B] border transition-all duration-200 flex flex-col justify-between ${
-                isAuditioning
-                  ? 'border-[#00AFFF] shadow-[0_0_20px_rgba(0,175,255,0.25)]'
-                  : 'border-[#27272A] hover:border-[#3F3F46]'
-              }`}
-            >
-              <div>
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2.5">
-                    <span
-                      className="w-3 h-3 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: p.color }}
-                    />
-                    <div>
-                      <h4 className="text-[14px] font-mono font-semibold text-[#FFFFFF] leading-tight">
-                        {p.name}
-                      </h4>
-                      <span className="text-[11px] font-mono text-[#71717A]">
-                        {p.brand}
-                      </span>
-                    </div>
-                  </div>
-
-                  <span className="text-[10px] font-mono font-bold text-[#00AFFF] uppercase px-2 py-0.5 rounded-[2px] bg-[#00AFFF]/10 border border-[#00AFFF]/20">
-                    {p.type}
-                  </span>
-                </div>
-
-                <p className="text-[12px] text-[#A1A1AA] mb-4 font-mono leading-relaxed">
-                  {p.description}
-                </p>
-
-                {/* Telemetry Matrix */}
-                <div className="bg-[#111113] border border-[#27272A] rounded-[2px] p-3 flex flex-col gap-2 text-[11px] font-mono mb-4">
-                  <div className="flex justify-between text-[#71717A]">
-                    <span>// FORCE_SPEC</span>
-                    <span className="text-[#FFFFFF] font-medium">{p.actuation} / {p.bottomOut}</span>
-                  </div>
-                  <div className="flex justify-between text-[#71717A]">
-                    <span>// ACOUSTIC_PROFILE</span>
-                    <span className="text-[#00AFFF] font-medium">{p.tag}</span>
-                  </div>
-                  <div className="flex justify-between text-[#71717A]">
-                    <span>// SAMPLE_MANIFEST</span>
-                    <span className="text-[#FFFFFF]">
-                      {p.files.press.length} Press + {p.files.release.length} Release
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Audition Button */}
-              <button
-                onClick={() => handleAudition(p.id)}
-                className={`w-full py-2.5 px-3 rounded-[2px] text-[12px] font-mono font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer border ${
-                  isAuditioning
-                    ? 'bg-[#00AFFF] text-[#000000] border-[#00AFFF] shadow-[0_0_15px_rgba(0,175,255,0.4)]'
-                    : 'bg-[#111113] hover:bg-[#27272A] text-[#FFFFFF] border-[#27272A]'
-                }`}
-              >
-                <svg
-                  width="13"
-                  height="13"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
-                </svg>
-                <span>{isAuditioning ? 'PLAYING SAMPLE...' : 'AUDITION KEYSTROKE'}</span>
-              </button>
-            </div>
-          );
-        })}
-      </div>
+        </AnimatePresence>
+      </motion.div>
     </section>
+  );
+}
+
+function Row({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string;
+  accent?: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <dt className="uppercase tracking-[0.09em] text-content-3">{label}</dt>
+      <dd
+        className="truncate text-right font-medium"
+        style={{ color: accent ? 'var(--accent)' : 'var(--text)' }}
+      >
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+function SoundBars() {
+  return (
+    <span className="flex h-3.5 items-end gap-[2px]">
+      {[0, 1, 2].map((i) => (
+        <motion.span
+          key={i}
+          className="w-[2.5px] rounded-full bg-current"
+          animate={{ height: ['30%', '100%', '45%', '80%', '30%'] }}
+          transition={{
+            duration: 0.7,
+            repeat: Infinity,
+            delay: i * 0.12,
+            ease: 'easeInOut',
+          }}
+          style={{ height: '30%' }}
+        />
+      ))}
+    </span>
   );
 }

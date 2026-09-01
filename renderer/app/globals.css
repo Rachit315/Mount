@@ -2,43 +2,121 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Neuform "Vortex System" Design Token System (#00AFFF Edition) ─ */
+/* ═══════════════════════════════════════════════════════════════════
+   MOUNT — "9009" Keycap Design System
+   A warm, tactile palette borrowed from vintage beige keycap sets:
+   cream alphas, tan modifiers, an aluminium case grey, and the
+   signature muted-red legend accent. Light = paper, Dark = charcoal.
+   ═══════════════════════════════════════════════════════════════════ */
+
 :root {
-  /* Colors */
-  --primary: #00AFFF;
-  --secondary: #000000;
-  --accent: #00AFFF;
-  --background: #000000;
-  --surface: #18181B;
-  --surface-elevated: #27272A;
-  --surface-recessed: #111113;
-  --border: #27272A;
-  --border-muted: rgba(255, 255, 255, 0.08);
-  --border-active: #00AFFF;
-  
-  /* Text */
-  --text-primary: #FFFFFF;
-  --text-secondary: #A1A1AA;
-  --text-muted: #71717A;
-  --text-dim: #52525B;
+  /* ── Surfaces (paper) ─────────────────────────────────────────── */
+  --bg: #f4f2ea;
+  --bg-grain: rgba(28, 27, 24, 0.02);
+  --surface: #ffffff;
+  --surface-2: #f0ece1;
+  --surface-3: #e6e1d2;
+  --surface-inset: #eae6d9;
 
-  /* Typography */
-  --font-display: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono-code: var(--font-mono), 'JetBrains Mono', monospace;
+  /* ── Lines ────────────────────────────────────────────────────── */
+  --border: #ded8c7;
+  --border-soft: rgba(28, 27, 24, 0.07);
+  --border-strong: #c3bba3;
 
-  /* Radii Scale (Sharp Brutalist Neuform: 2px - 4px) */
-  --radius-card: 2px;
-  --radius-control: 2px;
-  --radius-badge: 2px;
-  --radius-pill: 9999px;
+  /* ── Type ─────────────────────────────────────────────────────── */
+  --text: #1c1b18;
+  --text-2: #5b574e;
+  --text-3: #8b8578;
 
-  /* Glows & Shadows */
-  --glow-primary: 0 0 20px rgba(0, 175, 255, 0.25);
-  --glow-primary-subtle: 0 0 12px rgba(0, 175, 255, 0.15);
-  --shadow-card: 0 0 0 1px #27272A, 0 8px 24px rgba(0, 0, 0, 0.6);
+  /* ── Accent (9009 legend red) ─────────────────────────────────── */
+  --accent: #b0524a;
+  --accent-hover: #97443d;
+  --accent-soft: rgba(176, 82, 74, 0.1);
+  --accent-line: rgba(176, 82, 74, 0.28);
+  --accent-contrast: #ffffff;
+
+  /* ── Inverted primary (ink on paper) ──────────────────────────── */
+  --ink: #1c1b18;
+  --ink-contrast: #f6f4ed;
+
+  /* ── Keycaps (identical in both themes — that's the point) ────── */
+  --cap-alpha: #ece8dc;
+  --cap-alpha-top: #f4f1e8;
+  --cap-alpha-side: #d4cfbe;
+  --cap-mod: #cfc8ae;
+  --cap-mod-top: #d9d3bc;
+  --cap-mod-side: #b3ab8e;
+  --cap-accent: #b8b191;
+  --cap-legend: #4a4740;
+  --cap-legend-alt: #a1544a;
+  --case: #adaba4;
+  --case-top: #bcbab3;
+  --case-shadow: rgba(28, 27, 24, 0.22);
+
+  /* ── Elevation ────────────────────────────────────────────────── */
+  --shadow-xs: 0 1px 2px rgba(28, 27, 24, 0.05);
+  --shadow-sm: 0 1px 3px rgba(28, 27, 24, 0.07), 0 1px 2px rgba(28, 27, 24, 0.04);
+  --shadow-md: 0 4px 14px rgba(28, 27, 24, 0.08), 0 1px 3px rgba(28, 27, 24, 0.05);
+  --shadow-lg: 0 18px 44px rgba(28, 27, 24, 0.12), 0 4px 12px rgba(28, 27, 24, 0.06);
+  --shadow-inset: inset 0 1px 2px rgba(28, 27, 24, 0.08);
+
+  /* ── Radii ────────────────────────────────────────────────────── */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+  --r-full: 9999px;
+
+  /* ── Type families ────────────────────────────────────────────── */
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono-code: var(--font-mono), 'JetBrains Mono', ui-monospace, monospace;
+
+  /* ── Easing ───────────────────────────────────────────────────── */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  color-scheme: light;
 }
 
-/* ── Base Resets ───────────────────────────────────────────────────── */
+.dark {
+  --bg: #212120;
+  --bg-grain: rgba(255, 255, 255, 0.015);
+  --surface: #2a2a28;
+  --surface-2: #313130;
+  --surface-3: #3a3a37;
+  --surface-inset: #1c1c1b;
+
+  --border: #3c3c39;
+  --border-soft: rgba(255, 255, 255, 0.07);
+  --border-strong: #55554f;
+
+  --text: #f2efe6;
+  --text-2: #a9a49a;
+  --text-3: #78746b;
+
+  --accent: #d4837a;
+  --accent-hover: #e09a92;
+  --accent-soft: rgba(212, 131, 122, 0.13);
+  --accent-line: rgba(212, 131, 122, 0.32);
+  --accent-contrast: #241412;
+
+  --ink: #f2efe6;
+  --ink-contrast: #1c1b18;
+
+  --case: #9d9b95;
+  --case-top: #aeaca5;
+  --case-shadow: rgba(0, 0, 0, 0.5);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-inset: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+
+  color-scheme: dark;
+}
+
+/* ── Base ──────────────────────────────────────────────────────── */
 * {
   margin: 0;
   padding: 0;
@@ -47,160 +125,336 @@
 
 html {
   min-height: 100%;
-  background-color: #000000;
-  color: #FFFFFF;
-  font-family: var(--font-display);
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
 }
 
 body {
   min-height: 100%;
   overflow-x: hidden;
-  background-color: #000000;
+  background-color: var(--bg);
+  color: var(--text);
+  transition: background-color 0.45s var(--ease-out), color 0.45s var(--ease-out);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-contrast);
 }
 
 .font-mono {
   font-family: var(--font-mono-code);
 }
 
-/* ── Typography Scale ──────────────────────────────────────────────── */
+/* Theme crossfade. Applied to <html> only while a swap is in flight, so
+   ordinary hovers keep their own (much faster) transitions. */
+html.theme-transition,
+html.theme-transition * {
+  transition:
+    background-color 0.4s var(--ease-out),
+    border-color 0.4s var(--ease-out),
+    color 0.4s var(--ease-out),
+    fill 0.4s var(--ease-out),
+    box-shadow 0.4s var(--ease-out) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Typography scale ──────────────────────────────────────────── */
+.display-xl {
+  font-size: clamp(44px, 7.2vw, 86px);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+
 .display-lg {
-  font-family: var(--font-display);
-  font-size: clamp(38px, 6vw, 64px);
-  font-weight: 500;
+  font-size: clamp(34px, 5vw, 56px);
+  font-weight: 600;
   line-height: 1.04;
   letter-spacing: -0.03em;
 }
 
 .display-md {
-  font-family: var(--font-display);
-  font-size: clamp(28px, 4vw, 36px);
-  font-weight: 500;
+  font-size: clamp(26px, 3.4vw, 38px);
+  font-weight: 600;
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
+}
+
+.body-lg {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--text-2);
+  letter-spacing: -0.01em;
 }
 
 .body-md {
-  font-family: var(--font-mono-code);
   font-size: 15px;
-  font-weight: 400;
-  line-height: 1.6;
-  color: var(--text-secondary);
+  line-height: 1.65;
+  color: var(--text-2);
+  letter-spacing: -0.005em;
 }
 
 .label-md {
   font-family: var(--font-mono-code);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
   line-height: 1.2;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.11em;
+  color: var(--text-3);
 }
 
-/* ── Neuform Vortex Components ─────────────────────────────────────── */
-.vortex-card {
-  background-color: #18181B;
-  border: 1px solid #27272A;
-  border-radius: var(--radius-card);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+/* ── Cards ─────────────────────────────────────────────────────── */
+.card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.35s var(--ease-out),
+    box-shadow 0.35s var(--ease-out),
+    border-color 0.35s var(--ease-out),
+    background-color 0.4s var(--ease-out);
 }
 
-.vortex-card:hover {
-  border-color: #3F3F46;
-  box-shadow: 0 0 0 1px #3F3F46, 0 12px 32px rgba(0, 0, 0, 0.7);
+.card-hover:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-lg);
 }
 
-.vortex-card-active {
-  border-color: #00AFFF;
-  box-shadow: 0 0 0 1px #00AFFF, 0 0 20px rgba(0, 175, 255, 0.15);
+.card-inset {
+  background-color: var(--surface-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-inset);
 }
 
-.vortex-btn-primary {
-  background-color: #00AFFF;
-  color: #000000;
-  font-family: var(--font-mono-code);
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.02em;
-  height: 42px;
-  border-radius: var(--radius-control);
+/* ── Buttons ───────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 550;
+  letter-spacing: -0.01em;
+  height: 44px;
   padding: 0 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 1px solid #00AFFF;
-  transition: all 0.15s ease;
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
   cursor: pointer;
-  box-shadow: 0 0 18px rgba(0, 175, 255, 0.35);
+  white-space: nowrap;
+  transition:
+    transform 0.18s var(--ease-out),
+    background-color 0.2s var(--ease-out),
+    border-color 0.2s var(--ease-out),
+    color 0.2s var(--ease-out),
+    box-shadow 0.25s var(--ease-out);
 }
 
-.vortex-btn-primary:hover {
-  background-color: #33BFFF;
-  box-shadow: 0 0 26px rgba(0, 175, 255, 0.55);
-  transform: translateY(-1px);
+.btn:active {
+  transform: translateY(1px) scale(0.985);
 }
 
-.vortex-btn-ghost {
+.btn-primary {
+  background-color: var(--ink);
+  color: var(--ink-contrast);
+  border-color: var(--ink);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.btn-accent {
+  background-color: var(--accent);
+  color: var(--accent-contrast);
+  border-color: var(--accent);
+  box-shadow: 0 6px 18px var(--accent-soft);
+}
+
+.btn-accent:hover {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+  transform: translateY(-2px);
+}
+
+.btn-ghost {
+  background-color: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+  box-shadow: var(--shadow-xs);
+}
+
+.btn-ghost:hover {
+  background-color: var(--surface-2);
+  border-color: var(--border-strong);
+}
+
+.btn-quiet {
   background-color: transparent;
-  color: #A1A1AA;
-  font-family: var(--font-mono-code);
-  font-weight: 500;
+  color: var(--text-2);
+  border-color: transparent;
+}
+
+.btn-quiet:hover {
+  background-color: var(--surface-2);
+  color: var(--text);
+}
+
+.btn-sm {
+  height: 36px;
+  padding: 0 14px;
   font-size: 13px;
-  height: 42px;
-  border-radius: var(--radius-control);
-  padding: 0 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 1px solid #27272A;
-  transition: all 0.15s ease;
-  cursor: pointer;
+  border-radius: var(--r-sm);
 }
 
-.vortex-btn-ghost:hover {
-  background-color: #18181B;
-  border-color: #3F3F46;
-  color: #FFFFFF;
-}
-
-.vortex-badge {
-  font-family: var(--font-mono-code);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 4px 10px;
-  border-radius: var(--radius-badge);
-  background-color: #18181B;
-  border: 1px solid #27272A;
-  color: #A1A1AA;
+/* ── Badge / pill ──────────────────────────────────────────────── */
+.badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  font-family: var(--font-mono-code);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 11px;
+  border-radius: var(--r-full);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-2);
 }
 
-.vortex-badge-active {
-  background-color: rgba(0, 175, 255, 0.08);
-  border-color: rgba(0, 175, 255, 0.4);
-  color: #00AFFF;
+.badge-accent {
+  background-color: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent);
 }
 
-/* ── Technical Grid Overlay ────────────────────────────────────────── */
-.vortex-grid-bg {
-  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 32px 32px;
+/* ── Segmented control ─────────────────────────────────────────── */
+.segment {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background-color: var(--surface-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
 }
 
-.vortex-dither {
-  background-image: radial-gradient(rgba(0, 175, 255, 0.12) 1px, transparent 0);
-  background-size: 24px 24px;
+.segment-item {
+  position: relative;
+  flex: 1;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 550;
+  letter-spacing: -0.005em;
+  color: var(--text-2);
+  border-radius: calc(var(--r-md) - 4px);
+  cursor: pointer;
+  transition: color 0.2s var(--ease-out);
+  white-space: nowrap;
 }
 
-/* ── Custom Range Slider ───────────────────────────────────────────── */
+.segment-item:hover {
+  color: var(--text);
+}
+
+.segment-item[data-active='true'] {
+  color: var(--text);
+}
+
+/* ── Physical keycap (shared by hero board + visualizers) ──────── */
+.keycap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  background: linear-gradient(180deg, var(--cap-alpha-top) 0%, var(--cap-alpha) 62%, var(--cap-alpha-side) 100%);
+  border-radius: 5px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.55) inset,
+    0 -2px 3px rgba(28, 27, 24, 0.09) inset,
+    0 2px 3px rgba(28, 27, 24, 0.28);
+  color: var(--cap-legend);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  /* No will-change here on purpose: a board is ~70 caps and a page can hold
+     several, and promoting every one exhausts the compositor's layer budget. */
+  transition:
+    transform 0.09s var(--ease-out),
+    box-shadow 0.09s var(--ease-out),
+    filter 0.18s var(--ease-out);
+}
+
+.keycap[data-mod='true'] {
+  background: linear-gradient(180deg, var(--cap-mod-top) 0%, var(--cap-mod) 62%, var(--cap-mod-side) 100%);
+}
+
+.keycap[data-accent='true'] {
+  background: linear-gradient(180deg, #c8c1a3 0%, var(--cap-accent) 62%, #9d9678 100%);
+  color: var(--cap-legend-alt);
+}
+
+.keycap[data-pressed='true'] {
+  transform: translateY(2.5px) scale(0.982);
+  box-shadow:
+    0 0 0 1px rgba(28, 27, 24, 0.12) inset,
+    0 -1px 2px rgba(28, 27, 24, 0.14) inset,
+    0 0 0 rgba(28, 27, 24, 0.28);
+  filter: brightness(0.94);
+}
+
+.keycap-case {
+  background: linear-gradient(170deg, var(--case-top) 0%, var(--case) 55%, color-mix(in srgb, var(--case) 82%, black) 100%);
+  border-radius: var(--r-md);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.35) inset,
+    0 -3px 6px rgba(0, 0, 0, 0.14) inset,
+    0 22px 48px var(--case-shadow);
+}
+
+/* ── Grain / texture overlay ───────────────────────────────────── */
+.grain {
+  background-image: radial-gradient(var(--bg-grain) 1px, transparent 0);
+  background-size: 3px 3px;
+}
+
+.dot-grid {
+  background-image: radial-gradient(color-mix(in srgb, var(--text-3) 32%, transparent) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+.line-grid {
+  background-image:
+    linear-gradient(to right, var(--border-soft) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border-soft) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+/* ── Range input reset ─────────────────────────────────────────── */
 input[type='range'] {
   -webkit-appearance: none;
   appearance: none;
@@ -215,36 +469,85 @@ input[type='range']::-webkit-slider-thumb {
   height: 0;
 }
 
-/* ── Scrollbars ────────────────────────────────────────────────────── */
+/* ── Scrollbars ────────────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 9px;
+  height: 9px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #000000;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #27272A;
-  border-radius: 2px;
+  background: var(--border-strong);
+  border-radius: var(--r-full);
+  border: 3px solid var(--bg);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #00AFFF;
+  background: var(--text-3);
 }
 
 .scrollbar-thin::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
+
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #27272A;
+  background: var(--border-strong);
+  border: 1px solid transparent;
+  background-clip: padding-box;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ── Focus ─────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Marquee (switch ticker) ───────────────────────────────────── */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 46s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+/* ── Ambient breathing glow ────────────────────────────────────── */
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.06);
+  }
+}
+
+.breathe {
+  animation: breathe 7s ease-in-out infinite;
 }

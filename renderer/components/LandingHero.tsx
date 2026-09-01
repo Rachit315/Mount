@@ -1,91 +1,160 @@
 'use client';
 
 import Link from 'next/link';
-import { AudioVisualizerWave } from './AudioVisualizerWave';
+import { motion } from 'motion/react';
+import { Keyboard3D } from './Keyboard3D';
+import { useSoundSession } from '@/lib/sound-session';
 
 interface LandingHeroProps {
   onOpenDownload: () => void;
 }
 
+const EASE = [0.22, 1, 0.36, 1] as const;
+
+const STATS = [
+  { value: '<10ms', label: 'Input latency' },
+  { value: '13', label: 'Switch packs' },
+  { value: 'Stereo', label: 'Spatial panning' },
+  { value: '100%', label: 'Offline' },
+];
+
+const HEADLINE = ['Your keyboard,', 'but it sounds'];
+
 export function LandingHero({ onOpenDownload }: LandingHeroProps) {
+  // Live keystrokes drive the hero board — type anywhere and it responds.
+  const { pressedKeys, profileId } = useSoundSession();
+
   return (
-    <section className="relative pt-24 pb-20 px-6 text-center max-w-[1240px] mx-auto z-10">
-      {/* Vortex System Tag */}
-      <div className="inline-flex items-center gap-2.5 px-3.5 py-1 rounded-[2px] bg-[#18181B] border border-[#27272A] mb-8 shadow-sm">
-        <span className="w-2 h-2 rounded-full bg-[#00AFFF] animate-pulse" />
-        <span className="text-[11px] font-mono text-[#A1A1AA] uppercase tracking-wider">
-          [ VORTEX // CORE ] &bull; Absolute Synchronization
-        </span>
-      </div>
-
-      {/* Neuform Display Headline */}
-      <h1 className="display-lg text-[#FFFFFF] max-w-4xl mx-auto mb-6">
-        Real mechanical keyboard sounds. <span className="text-[#00AFFF]">Anywhere on your PC.</span>
-      </h1>
-
-      {/* Subtitle */}
-      <p className="body-md max-w-2xl mx-auto mb-10 text-[#A1A1AA]">
-        Engineered for scale. Controlled by none. 13 authentic hardware switch sound packs with zero perceptible latency, physical stereo coordinates, and dual press/release sampling.
-      </p>
-
-      {/* Audio Wave Spectrum */}
-      <div className="w-full max-w-lg mx-auto mb-10">
-        <AudioVisualizerWave height={44} />
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex flex-wrap items-center justify-center gap-4 mb-20">
-        <a
-          href="https://github.com/Rachit315/Mount/releases/latest/download/Mount-Windows-x64.zip"
-          download="Mount-Windows-x64.zip"
-          className="vortex-btn-primary h-12 px-6 text-[13px] flex items-center gap-2"
+    <section className="relative z-10 px-5 pb-10 pt-14 sm:px-6 sm:pt-20">
+      <div className="mx-auto max-w-shell text-center">
+        {/* Eyebrow */}
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: EASE }}
+          className="mb-7 flex justify-center"
         >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-          <span>DOWNLOAD FOR WINDOWS (.ZIP)</span>
-        </a>
+          <span className="badge">
+            <span
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ backgroundColor: 'var(--accent)' }}
+            />
+            Free &amp; open source · Windows + macOS
+          </span>
+        </motion.div>
 
-        {/* Tray popover link */}
-        <Link
-          href="/app"
-          className="font-mono text-[12px] text-[#A1A1AA] hover:text-[#FFFFFF] px-4 py-3 transition-colors bg-[#18181B] border border-[#27272A] rounded-[2px] hover:border-[#3F3F46]"
+        {/* Headline — words rise in sequence */}
+        <h1 className="display-xl mx-auto mb-6 max-w-4xl text-content">
+          {HEADLINE.map((line, li) => (
+            <span key={li} className="block overflow-hidden pb-1">
+              {line.split(' ').map((word, wi) => (
+                <motion.span
+                  key={`${li}-${wi}`}
+                  initial={{ y: '110%', opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{
+                    duration: 0.85,
+                    ease: EASE,
+                    delay: 0.08 + li * 0.16 + wi * 0.07,
+                  }}
+                  className="inline-block"
+                >
+                  {word}
+                  {wi < line.split(' ').length - 1 && ' '}
+                </motion.span>
+              ))}
+            </span>
+          ))}
+          <span className="block overflow-hidden pb-1">
+            <motion.span
+              initial={{ y: '110%', opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.85, ease: EASE, delay: 0.42 }}
+              className="inline-block italic"
+              style={{ color: 'var(--accent)' }}
+            >
+              expensive.
+            </motion.span>
+          </span>
+        </h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: EASE, delay: 0.5 }}
+          className="body-lg mx-auto mb-9 max-w-xl"
         >
-          <span>[ TRAY_POPOVER_MODE ]</span>
-          <span className="ml-1 text-[#00AFFF]">↗</span>
-        </Link>
+          Mount layers real, sampled mechanical switch audio over every keystroke
+          you make — anywhere on your machine. Thirteen boards, true stereo
+          placement, and nothing ever leaves your computer.
+        </motion.p>
+
+        {/* Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: EASE, delay: 0.58 }}
+          className="mb-4 flex flex-wrap items-center justify-center gap-3"
+        >
+          <button onClick={onOpenDownload} className="btn btn-primary">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Download for free
+          </button>
+
+          <Link href="/app" className="btn btn-ghost">
+            Try it in the browser
+            <span aria-hidden style={{ color: 'var(--accent)' }}>
+              →
+            </span>
+          </Link>
+        </motion.div>
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.7, delay: 0.75 }}
+          className="mb-14 font-mono text-[11.5px] uppercase tracking-[0.14em] text-content-3"
+        >
+          Start typing — the board below is listening
+        </motion.p>
       </div>
 
-      {/* Engineering Telemetry Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-4xl mx-auto text-left">
-        <div className="p-4 bg-[#18181B] border border-[#27272A] rounded-[2px] hover:border-[#00AFFF]/40 transition-colors">
-          <p className="label-md text-[#71717A]">// LATENCY</p>
-          <p className="text-[20px] font-semibold text-[#FFFFFF] mt-1 font-mono">&lt;10MS</p>
-          <p className="text-[11px] text-[#A1A1AA] mt-0.5 font-mono">Native low-level hook</p>
-        </div>
-
-        <div className="p-4 bg-[#18181B] border border-[#27272A] rounded-[2px] hover:border-[#00AFFF]/40 transition-colors">
-          <p className="label-md text-[#71717A]">// SWITCH PACKS</p>
-          <p className="text-[20px] font-semibold text-[#00AFFF] mt-1 font-mono">13 PROFILES</p>
-          <p className="text-[11px] text-[#A1A1AA] mt-0.5 font-mono">Press &amp; release audio</p>
-        </div>
-
-        <div className="p-4 bg-[#18181B] border border-[#27272A] rounded-[2px] hover:border-[#00AFFF]/40 transition-colors">
-          <p className="label-md text-[#71717A]">// SPATIAL AUDIO</p>
-          <p className="text-[20px] font-semibold text-[#FFFFFF] mt-1 font-mono">STEREO</p>
-          <p className="text-[11px] text-[#A1A1AA] mt-0.5 font-mono">Physical key coords</p>
-        </div>
-
-        <div className="p-4 bg-[#18181B] border border-[#27272A] rounded-[2px] hover:border-[#00AFFF]/40 transition-colors">
-          <p className="label-md text-[#71717A]">// ZERO FRICTION</p>
-          <p className="text-[20px] font-semibold text-[#FFFFFF] mt-1 font-mono">100% OFFLINE</p>
-          <p className="text-[11px] text-[#A1A1AA] mt-0.5 font-mono">Zero telemetry</p>
-        </div>
+      {/* 3D board */}
+      <div className="mx-auto max-w-[920px] px-2 sm:px-4">
+        <Keyboard3D pressedKeys={pressedKeys} profileId={profileId} />
       </div>
+
+      {/* Stats strip */}
+      <motion.div
+        initial={{ opacity: 0, y: 26 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: EASE, delay: 0.95 }}
+        className="mx-auto mt-16 max-w-shell"
+      >
+        <div className="card grid grid-cols-2 divide-line sm:grid-cols-4 sm:divide-x">
+          {STATS.map((s) => (
+            <div key={s.label} className="px-5 py-6 text-center">
+              <p className="font-mono text-[26px] font-semibold tracking-[-0.03em] text-content">
+                {s.value}
+              </p>
+              <p className="mt-1 text-[13px] text-content-2">{s.label}</p>
+            </div>
+          ))}
+        </div>
+      </motion.div>
     </section>
   );
 }
-
-

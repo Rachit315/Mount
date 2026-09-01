@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
-import { useKeyboardEvents } from '../../lib/use-keyboard-events';
-import { getProfileById } from '../../lib/switch-profiles';
-import { LogoIcon } from '../../components/LogoIcon';
+import { useKeyboardEvents } from '@/lib/use-keyboard-events';
+import { LogoIcon } from '@/components/LogoIcon';
+import { ThemeToggle } from '@/components/ThemeToggle';
+
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 function detectIsMac(): boolean {
   if (typeof navigator === 'undefined') return false;
@@ -18,7 +20,6 @@ export default function OnboardingPage() {
   const [isMac, setIsMac] = useState(false);
 
   useEffect(() => {
-    // Prefer Electron's platform API if available
     if (window.mount?.getPlatform) {
       window.mount.getPlatform().then((p) => setIsMac(p === 'darwin'));
     } else {
@@ -31,134 +32,171 @@ export default function OnboardingPage() {
     profileId: 'alpaca',
   });
 
-  const profile = getProfileById('alpaca');
-  const shortcutKey = isMac ? '⌘+Shift+K' : 'Ctrl+Shift+K';
+  const shortcutKey = isMac ? '⌘ + Shift + K' : 'Ctrl + Shift + K';
 
   return (
-    <div className="min-h-screen bg-[#000000] flex flex-col items-center justify-center p-6 text-[#FFFFFF] select-none font-mono relative overflow-hidden">
-      {/* Ambient background glow */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#00AFFF]/[0.08] via-transparent to-transparent pointer-events-none" />
+    <div className="relative flex min-h-screen select-none flex-col items-center justify-center overflow-hidden bg-bg p-6 text-content">
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(90% 60% at 50% -5%, var(--accent-soft), transparent 65%)',
+        }}
+      />
+      <div className="grain pointer-events-none absolute inset-0 opacity-60" />
 
-      <div className="relative w-full max-w-sm z-10">
-        {/* Progress indicators */}
-        <div className="flex justify-center gap-1.5 mb-6">
+      <div className="absolute right-5 top-5 z-10">
+        <ThemeToggle size={34} />
+      </div>
+
+      <div className="relative z-10 w-full max-w-[380px]">
+        {/* Progress */}
+        <div className="mb-6 flex justify-center gap-1.5">
           {[1, 2, 3].map((s) => (
-            <div
+            <motion.span
               key={s}
-              className={`h-1 rounded-[2px] transition-all duration-300 ${
-                s === step
-                  ? 'w-8 bg-[#00AFFF]'
-                  : s < step
-                    ? 'w-4 bg-[#00AFFF]/50'
-                    : 'w-4 bg-white/10'
-              }`}
+              className="h-[3px] rounded-full"
+              initial={false}
+              animate={{
+                width: s === step ? 30 : 16,
+                backgroundColor:
+                  s <= step ? 'var(--accent)' : 'var(--border-strong)',
+                opacity: s < step ? 0.5 : 1,
+              }}
+              transition={{ duration: 0.35, ease: EASE }}
             />
           ))}
         </div>
 
         <AnimatePresence mode="wait">
           {step === 1 && (
-            <motion.div
-              key="step-1"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="bg-[#18181B] border border-[#27272A] rounded-[2px] p-6 shadow-2xl text-center"
-            >
-              <div className="flex justify-center mx-auto mb-4">
-                <LogoIcon size={44} />
+            <Card key="step-1">
+              <div className="mx-auto mb-5 flex justify-center">
+                <motion.span
+                  initial={{ scale: 0.6, rotate: -14, opacity: 0 }}
+                  animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 280, damping: 18 }}
+                  className="flex"
+                >
+                  <LogoIcon size={48} />
+                </motion.span>
               </div>
 
-              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] bg-[#00AFFF]/10 border border-[#00AFFF]/20 text-[#00AFFF] text-[10px] font-mono mb-2 uppercase">
-                <span>[ VORTEX // SETUP ]</span>
-              </div>
-
-              <h1 className="text-xl font-bold text-[#FFFFFF] mb-2 font-mono">Welcome to Mount</h1>
-              <p className="text-xs text-[#A1A1AA] mb-6 leading-relaxed">
-                Experience authentic mechanical keyboard sounds while typing anywhere on your {isMac ? 'Mac' : 'PC'}. 13 hardware switch packs, spatial audio, and 100% offline.
+              <h1 className="mb-2.5 text-[22px] font-semibold tracking-[-0.025em] text-content">
+                Welcome to Mount
+              </h1>
+              <p className="body-md mb-7 text-[14px]">
+                Real mechanical switch sound over everything you type on your{' '}
+                {isMac ? 'Mac' : 'PC'}. Thirteen sampled boards, stereo
+                placement, and nothing leaves the machine.
               </p>
 
               <button
                 onClick={() => setStep(2)}
-                className="w-full py-2.5 px-4 bg-[#00AFFF] hover:bg-[#33BFFF] text-[#000000] text-xs font-bold rounded-[2px] transition-all shadow-[0_0_15px_rgba(0,175,255,0.4)] cursor-pointer uppercase"
+                className="btn btn-primary w-full"
               >
-                Get Started &rarr;
+                Get started
               </button>
-            </motion.div>
+            </Card>
           )}
 
           {step === 2 && (
-            <motion.div
-              key="step-2"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="bg-[#18181B] border border-[#27272A] rounded-[2px] p-6 shadow-2xl text-center"
-            >
-              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] bg-[#00AFFF]/10 border border-[#00AFFF]/20 text-[#00AFFF] text-[10px] font-mono mb-2 uppercase">
-                <span>[ CALIBRATION // 02 ]</span>
-              </div>
-
-              <h2 className="text-lg font-bold text-[#FFFFFF] mb-1 font-mono">Test Your Sound</h2>
-              <p className="text-xs text-[#A1A1AA] mb-4">
-                Type anything on your physical keyboard to audition downstroke &amp; release audio feedback.
+            <Card key="step-2">
+              <h2 className="mb-2 text-[19px] font-semibold tracking-[-0.02em] text-content">
+                Give it a try
+              </h2>
+              <p className="body-md mb-5 text-[14px]">
+                Type anything at all — you&apos;ll hear both the downstroke and
+                the release.
               </p>
 
               <div
                 tabIndex={0}
                 onKeyDown={() => setTestCount((c) => c + 1)}
-                className="my-4 p-4 rounded-[2px] bg-[#111113] border border-[#27272A] focus:border-[#00AFFF] outline-none cursor-pointer transition-colors"
+                className="card-inset mb-6 cursor-pointer px-4 py-5 text-center outline-none"
               >
-                <p className="text-[10px] text-[#71717A] mb-1 font-mono uppercase">// KEYSTROKES_DETECTED</p>
-                <p className="text-3xl font-bold text-[#00AFFF] tabular-nums font-mono">
+                <p className="label-md mb-1.5">Keystrokes heard</p>
+                <motion.p
+                  key={keystrokeCount + testCount}
+                  initial={{ scale: 1.18, opacity: 0.6 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.22, ease: EASE }}
+                  className="font-mono text-[38px] font-semibold tabular-nums leading-none"
+                  style={{ color: 'var(--accent)' }}
+                >
                   {keystrokeCount + testCount}
-                </p>
-                <p className="text-[10px] text-[#52525B] mt-1 font-mono">Focus here or type anywhere</p>
+                </motion.p>
               </div>
 
-              <div className="flex gap-2 mt-6">
+              <div className="flex gap-2.5">
                 <button
                   onClick={() => setStep(1)}
-                  className="flex-1 py-2.5 px-4 bg-[#111113] hover:bg-[#27272A] border border-[#27272A] text-[#FFFFFF] text-xs font-semibold rounded-[2px] transition-colors cursor-pointer uppercase"
+                  className="btn btn-ghost flex-1"
                 >
                   Back
                 </button>
                 <button
                   onClick={() => setStep(3)}
-                  className="flex-1 py-2.5 px-4 bg-[#00AFFF] hover:bg-[#33BFFF] text-[#000000] text-xs font-bold rounded-[2px] transition-all shadow-[0_0_15px_rgba(0,175,255,0.4)] cursor-pointer uppercase"
+                  className="btn btn-primary flex-1"
                 >
-                  Sounds Good!
+                  Sounds good
                 </button>
               </div>
-            </motion.div>
+            </Card>
           )}
 
           {step === 3 && (
-            <motion.div
-              key="step-3"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="bg-[#18181B] border border-[#27272A] rounded-[2px] p-6 shadow-2xl text-center"
-            >
-              <div className="w-12 h-12 rounded-[2px] bg-[#00AFFF]/10 text-[#00AFFF] flex items-center justify-center mx-auto mb-4 border border-[#00AFFF]/30 shadow-[0_0_15px_rgba(0,175,255,0.3)]">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </div>
+            <Card key="step-3">
+              <motion.div
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 17 }}
+                className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full"
+                style={{
+                  backgroundColor: 'var(--accent-soft)',
+                  color: 'var(--accent)',
+                }}
+              >
+                <motion.svg
+                  width="26"
+                  height="26"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <motion.polyline
+                    points="20 6 9 17 4 12"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 0.45, delay: 0.2, ease: EASE }}
+                  />
+                </motion.svg>
+              </motion.div>
 
-              <h2 className="text-lg font-bold text-[#FFFFFF] mb-2 font-mono">System Ready</h2>
-              <p className="text-xs text-[#A1A1AA] mb-4 leading-relaxed">
-                Mount is running in your {isMac ? 'menu bar' : 'system tray'}. Press <kbd className="px-1.5 py-0.5 rounded-[2px] bg-[#111113] border border-[#27272A] text-[#00AFFF] font-mono text-[10px]">{shortcutKey}</kbd> to toggle the popover at any time.
+              <h2 className="mb-2.5 text-[19px] font-semibold tracking-[-0.02em] text-content">
+                You&apos;re all set
+              </h2>
+              <p className="body-md mb-6 text-[14px]">
+                Mount lives in your {isMac ? 'menu bar' : 'system tray'}. Press{' '}
+                <kbd
+                  className="rounded-sm border border-line px-1.5 py-0.5 font-mono text-[11px]"
+                  style={{
+                    backgroundColor: 'var(--surface-inset)',
+                    color: 'var(--accent)',
+                  }}
+                >
+                  {shortcutKey}
+                </kbd>{' '}
+                to bring this panel back any time.
               </p>
 
-              <Link
-                href="/"
-                className="block w-full py-2.5 px-4 bg-[#00AFFF] hover:bg-[#33BFFF] text-[#000000] text-xs font-bold rounded-[2px] transition-all shadow-[0_0_15px_rgba(0,175,255,0.4)] text-center uppercase"
-              >
-                Open Mount System
+              <Link href="/app" className="btn btn-primary w-full">
+                Open Mount
               </Link>
-            </motion.div>
+            </Card>
           )}
         </AnimatePresence>
       </div>
@@ -166,3 +204,16 @@ export default function OnboardingPage() {
   );
 }
 
+function Card({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 14, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -14, scale: 0.98 }}
+      transition={{ duration: 0.35, ease: EASE }}
+      className="card p-7 text-center shadow-lg"
+    >
+      {children}
+    </motion.div>
+  );
+}

@@ -23,9 +23,19 @@ export function useKeyboardEvents({ enabled, profileId }: UseKeyboardEventsOptio
   const enabledRef = useRef(enabled);
   const profileIdRef = useRef(profileId);
 
+  // Keycodes physically held down right now. The OS emits repeated keydown
+  // events while a key is held; only the first is a real keystroke.
+  const heldKeys = useRef<Set<number>>(new Set());
+
   // Keep refs in sync so the event callbacks always read the latest values
   useEffect(() => {
     enabledRef.current = enabled;
+    // Muting mid-press would otherwise leave that key stuck in `heldKeys`,
+    // since its keyup arrives while the engine is off.
+    if (!enabled) {
+      heldKeys.current.clear();
+      setPressedKeys(new Set());
+    }
   }, [enabled]);
 
   useEffect(() => {
@@ -43,6 +53,12 @@ export function useKeyboardEvents({ enabled, profileId }: UseKeyboardEventsOptio
   const handleKeyDown = useCallback((keycode: number) => {
     if (!enabledRef.current) return;
 
+    // Hold a key and the OS auto-repeats keydown ~30x/sec. Ignore every repeat
+    // until the matching keyup. Because this is tracked per keycode, chords
+    // still behave: Ctrl, Shift and the letter each fire once, together.
+    if (heldKeys.current.has(keycode)) return;
+    heldKeys.current.add(keycode);
+
     audioEngine.playKeystroke(keycode, 'press', profileIdRef.current);
 
     setPressedKeys((prev) => new Set(prev).add(keycode));
@@ -51,7 +67,11 @@ export function useKeyboardEvents({ enabled, profileId }: UseKeyboardEventsOptio
   }, []);
 
   const handleKeyUp = useCallback((keycode: number) => {
-    if (enabledRef.current) {
+    // Only sound the release for a press we actually voiced, so a stray keyup
+    // (key held while the app started, say) stays silent.
+    const wasHeld = heldKeys.current.delete(keycode);
+
+    if (enabledRef.current && wasHeld) {
       audioEngine.playKeystroke(keycode, 'release', profileIdRef.current);
     }
 
@@ -60,6 +80,18 @@ export function useKeyboardEvents({ enabled, profileId }: UseKeyboardEventsOptio
       next.delete(keycode);
       return next;
     });
+  }, []);
+
+  // A keyup can go missing when the window loses focus mid-press (browser
+  // path); without this the key would be stuck "down" and never sound again.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const release = () => {
+      heldKeys.current.clear();
+      setPressedKeys(new Set());
+    };
+    window.addEventListener('blur', release);
+    return () => window.removeEventListener('blur', release);
   }, []);
 
   // ── Electron IPC path ──────────────────────────────────────────────

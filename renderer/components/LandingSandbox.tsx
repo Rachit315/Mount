@@ -1,226 +1,271 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { switchProfiles, SwitchType } from '@/lib/switch-profiles';
 import { audioEngine } from '@/lib/audio-engine';
-import { useKeyboardEvents } from '@/lib/use-keyboard-events';
+import { useSoundSession } from '@/lib/sound-session';
 import { TonePitchPad } from '@/components/TonePitchPad';
 import { Visualizer } from '@/components/Visualizer';
 import { VolumeControl } from '@/components/VolumeControl';
 import { AudioVisualizerWave } from '@/components/AudioVisualizerWave';
+import { SectionHeading } from '@/components/SectionHeading';
+import { Reveal } from '@/components/Reveal';
+
+const TABS = ['all', 'linear', 'tactile', 'clicky'] as const;
 
 export function LandingSandbox() {
-  const [selectedProfile, setSelectedProfile] = useState('alpaca');
+  const {
+    profileId,
+    setProfileId,
+    volume,
+    setVolume,
+    toneX,
+    pitchY,
+    setTonePitch,
+    pressedKeys,
+    keystrokeCount,
+  } = useSoundSession();
+
   const [filter, setFilter] = useState<'all' | SwitchType>('all');
-  const [volume, setVolume] = useState(0.8);
-  const [toneX, setToneX] = useState(0.5);
-  const [pitchY, setPitchY] = useState(0.5);
 
-  const { pressedKeys, keystrokeCount } = useKeyboardEvents({
-    enabled: true,
-    profileId: selectedProfile,
-  });
+  const activeProfile =
+    switchProfiles.find((p) => p.id === profileId) || switchProfiles[0];
 
-  const activeProfile = switchProfiles.find((p) => p.id === selectedProfile) || switchProfiles[0];
-
-  const filteredProfiles = filter === 'all'
-    ? switchProfiles
-    : switchProfiles.filter((p) => p.type === filter);
-
-  const handleVolume = useCallback((v: number) => {
-    setVolume(v);
-    audioEngine.setVolume(v);
-  }, []);
-
-  const handleTonePitch = useCallback((tx: number, py: number) => {
-    setToneX(tx);
-    setPitchY(py);
-    audioEngine.setTone(tx);
-    audioEngine.setPitch(py);
-  }, []);
-
-  const triggerTestSound = (keycode = 30, action: 'press' | 'release' = 'press') => {
-    audioEngine.playKeystroke(keycode, action, selectedProfile);
-  };
+  const filteredProfiles =
+    filter === 'all'
+      ? switchProfiles
+      : switchProfiles.filter((p) => p.type === filter);
 
   return (
-    <section id="sandbox" className="py-20 px-6 max-w-[1240px] mx-auto relative z-10">
-      {/* Section Header */}
-      <div className="mb-10 text-left flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <div className="inline-flex items-center gap-2 text-[11px] font-mono text-[#00AFFF] mb-2 uppercase">
-            <span>[ MODULE // 01 ]</span>
-            <span>&bull;</span>
-            <span>Acoustic Emulation Sandbox</span>
-          </div>
-          <h3 className="display-md text-[#FFFFFF]">
-            Interactive Sound Engine
-          </h3>
-          <p className="body-md text-[#A1A1AA] text-sm mt-1 max-w-xl">
-            Type freely on your physical keyboard to audition all 13 sampled hardware switch models in real time.
-          </p>
-        </div>
+    <section
+      id="sandbox"
+      className="relative z-10 mx-auto max-w-shell px-5 py-24 sm:px-6"
+    >
+      <SectionHeading
+        eyebrow="Live demo"
+        title="Audition every board, right here"
+        description="Pick a switch, then type on your real keyboard. Everything below runs the exact engine that ships in the desktop app."
+        trailing={
+          <span className="badge badge-accent">
+            <motion.span
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ backgroundColor: 'currentColor' }}
+              animate={{ opacity: [1, 0.3, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            Engine online
+          </span>
+        }
+      />
 
-        <div className="font-mono text-[12px] text-[#A1A1AA] bg-[#18181B] border border-[#27272A] px-3.5 py-1.5 rounded-[2px] self-start md:self-auto flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#00AFFF]" />
-          <span>STATUS: ONLINE // &lt;10MS</span>
-        </div>
-      </div>
+      <Reveal y={30}>
+        <div className="card grid grid-cols-1 gap-6 p-5 sm:p-7 lg:grid-cols-12">
+          {/* ── Left: picker + controls ─────────────────────────────── */}
+          <div className="flex flex-col gap-5 lg:col-span-5">
+            <div>
+              <div className="mb-3 flex items-center justify-between">
+                <span className="label-md">Switch profile</span>
+                <span
+                  className="font-mono text-[11px] font-semibold"
+                  style={{ color: 'var(--accent)' }}
+                >
+                  {activeProfile.name}
+                </span>
+              </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-[#18181B] border border-[#27272A] rounded-[2px] p-6 sm:p-8 shadow-2xl">
-        {/* Left column: Switch selector & 2D pad */}
-        <div className="lg:col-span-5 flex flex-col gap-4">
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="label-md text-[#A1A1AA]">
-                // SELECT_SWITCH_PROFILE
-              </span>
-              <span className="label-md text-[#00AFFF]">
-                {activeProfile.name}
-              </span>
+              <SegmentedTabs value={filter} onChange={setFilter} />
+
+              <div className="scrollbar-thin mt-3 grid max-h-[268px] grid-cols-2 gap-2 overflow-y-auto pr-1">
+                {filteredProfiles.map((p) => {
+                  const isSelected = p.id === profileId;
+                  return (
+                    <motion.button
+                      key={p.id}
+                      layout
+                      onClick={() => setProfileId(p.id)}
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.97 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 26 }}
+                      className="relative rounded-md border p-3 text-left"
+                      style={{
+                        borderColor: isSelected
+                          ? 'var(--accent-line)'
+                          : 'var(--border)',
+                        backgroundColor: isSelected
+                          ? 'var(--accent-soft)'
+                          : 'var(--surface-inset)',
+                      }}
+                    >
+                      <div className="mb-1.5 flex items-center gap-2">
+                        <span
+                          className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
+                          style={{ backgroundColor: p.color }}
+                        />
+                        <span className="truncate text-[12.5px] font-semibold text-content">
+                          {p.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-content-3">
+                        <span>{p.type}</span>
+                        <span
+                          className="truncate pl-1"
+                          style={{ color: 'var(--accent)' }}
+                        >
+                          {p.tag}
+                        </span>
+                      </div>
+                    </motion.button>
+                  );
+                })}
+              </div>
             </div>
 
-            {/* Filter pills */}
-            <div className="flex items-center gap-1 mb-2.5 p-1 bg-[#111113] rounded-[2px] border border-[#27272A]">
-              {(['all', 'linear', 'tactile', 'clicky'] as const).map((tab) => {
-                const isActive = filter === tab;
-                const count = tab === 'all'
-                  ? switchProfiles.length
-                  : switchProfiles.filter((p) => p.type === tab).length;
-
-                return (
-                  <button
-                    key={tab}
-                    onClick={() => setFilter(tab)}
-                    className={`flex-1 py-1 px-2 text-[10px] font-mono font-semibold rounded-[2px] uppercase transition-all cursor-pointer ${
-                      isActive
-                        ? 'bg-[#00AFFF] text-[#000000] shadow-sm font-bold'
-                        : 'text-[#A1A1AA] hover:text-[#FFFFFF] hover:bg-white/[0.04]'
-                    }`}
-                  >
-                    {tab} [{count}]
-                  </button>
-                );
-              })}
+            <div className="card-inset p-1">
+              <VolumeControl volume={volume} onChange={setVolume} />
             </div>
 
-            {/* Switch Cards Grid */}
-            <div className="grid grid-cols-2 gap-2 max-h-[260px] overflow-y-auto pr-1 scrollbar-thin">
-              {filteredProfiles.map((p) => {
-                const isSelected = p.id === selectedProfile;
-                return (
-                  <button
-                    key={p.id}
-                    onClick={() => {
-                      setSelectedProfile(p.id);
-                      audioEngine.playKeystroke(30, 'press', p.id);
-                    }}
-                    className={`p-3 rounded-[2px] text-left cursor-pointer transition-all duration-150 relative border ${
-                      isSelected
-                        ? 'bg-[#27272A] border-[#00AFFF] shadow-[0_0_12px_rgba(0,175,255,0.2)]'
-                        : 'bg-[#111113] border-[#27272A] hover:border-[#3F3F46]'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <span
-                        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: p.color }}
-                      />
-                      <span className="text-[12px] font-mono font-semibold text-[#FFFFFF] truncate">
-                        {p.name}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-[10px] font-mono text-[#A1A1AA]">
-                      <span className="uppercase">{p.type}</span>
-                      <span className="text-[#00AFFF] text-[9px] px-1 py-0.2 bg-[#00AFFF]/10 rounded-[2px] border border-[#00AFFF]/20">
-                        {p.tag}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Volume Control */}
-          <div className="bg-[#111113] border border-[#27272A] rounded-[2px] p-2">
-            <VolumeControl volume={volume} onChange={handleVolume} />
-          </div>
-
-          {/* 2D Tone & Pitch Pad */}
-          <div className="bg-[#111113] border border-[#27272A] rounded-[2px] p-2">
-            <TonePitchPad toneX={toneX} pitchY={pitchY} onChange={handleTonePitch} />
-          </div>
-        </div>
-
-        {/* Right column: Interactive Visualizer & Real-time Analyzer */}
-        <div className="lg:col-span-7 flex flex-col justify-between gap-4">
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="label-md text-[#A1A1AA]">
-                // LIVE_SPATIAL_KEY_MATRIX
-              </span>
-              <span className="font-mono text-[11px] text-[#00AFFF] tabular-nums">
-                COUNT: {keystrokeCount.toLocaleString()} KEYS
-              </span>
-            </div>
-
-            <div className="bg-[#111113] border border-[#27272A] rounded-[2px] p-2">
-              <Visualizer
-                pressedKeys={pressedKeys}
-                accentColor="#00AFFF"
+            <div className="card-inset p-1">
+              <TonePitchPad
+                toneX={toneX}
+                pitchY={pitchY}
+                onChange={setTonePitch}
               />
             </div>
           </div>
 
-          {/* Real-time Oscilloscope */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="label-md text-[#71717A]">
-                // FREQUENCY_ANALYZER
-              </span>
-              <span className="font-mono text-[11px] text-[#00AFFF]">
-                {activeProfile.name} &bull; {activeProfile.soundDescription}
-              </span>
-            </div>
-            <AudioVisualizerWave height={38} />
-          </div>
-
-          {/* Typing test area */}
-          <div className="bg-[#111113] border border-[#27272A] rounded-[2px] p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="label-md text-[#FFFFFF]">
-                // LIVE_KEYSTROKE_INPUT
-              </span>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => triggerTestSound(57, 'press')}
-                  className="font-mono text-[11px] text-[#00AFFF] hover:underline cursor-pointer"
-                >
-                  [ SPACEBAR_TEST ]
-                </button>
-                <button
-                  onClick={() => triggerTestSound(28, 'press')}
-                  className="font-mono text-[11px] text-[#00AFFF] hover:underline cursor-pointer"
-                >
-                  [ ENTER_TEST ]
-                </button>
+          {/* ── Right: matrix + analyser + input ────────────────────── */}
+          <div className="flex flex-col gap-5 lg:col-span-7">
+            <div>
+              <div className="mb-2.5 flex items-center justify-between">
+                <span className="label-md">Spatial key matrix</span>
+                <span className="font-mono text-[11px] tabular-nums text-content-2">
+                  {keystrokeCount.toLocaleString()} keys
+                </span>
+              </div>
+              <div className="card-inset p-1">
+                <Visualizer
+                  pressedKeys={pressedKeys}
+                  accentColor={activeProfile.color}
+                  showHeader={false}
+                  unit={26}
+                />
               </div>
             </div>
 
-            <textarea
-              placeholder="Click here and type on your physical keyboard to audition live downstroke & release samples..."
-              rows={3}
-              className="w-full bg-[#18181B] border border-[#27272A] rounded-[2px] p-3 text-xs text-[#FFFFFF] placeholder-[#71717A] focus:outline-none focus:border-[#00AFFF] focus:ring-1 focus:ring-[#00AFFF] resize-none transition-all font-mono"
-            />
+            <div>
+              <div className="mb-2.5 flex items-center justify-between">
+                <span className="label-md">Frequency</span>
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={activeProfile.id}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.25 }}
+                    className="text-[12px] text-content-2"
+                  >
+                    {activeProfile.soundDescription}
+                  </motion.span>
+                </AnimatePresence>
+              </div>
+              <AudioVisualizerWave height={54} />
+            </div>
 
-            <div className="flex items-center justify-between mt-2.5 font-mono text-[11px] text-[#71717A]">
-              <span>Stereo headphones recommended for spatial audio</span>
-              <span className="text-[#00AFFF]">// 13 HARDWARE PROFILES READY</span>
+            <div className="card-inset p-4">
+              <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+                <span className="label-md">Type here</span>
+                <div className="flex items-center gap-2">
+                  <TestButton
+                    label="Spacebar"
+                    onClick={() =>
+                      audioEngine.playKeystroke(57, 'press', profileId)
+                    }
+                  />
+                  <TestButton
+                    label="Enter"
+                    onClick={() =>
+                      audioEngine.playKeystroke(28, 'press', profileId)
+                    }
+                  />
+                </div>
+              </div>
+
+              <textarea
+                placeholder="Click in and type — you'll hear the downstroke and the release, panned to where each key sits."
+                rows={3}
+                className="w-full resize-none rounded-md border border-line bg-surface p-3 text-[13px] leading-relaxed text-content placeholder:text-content-3 focus:outline-none"
+                style={{ transition: 'border-color 0.2s var(--ease-out)' }}
+                onFocus={(e) =>
+                  (e.currentTarget.style.borderColor = 'var(--accent-line)')
+                }
+                onBlur={(e) =>
+                  (e.currentTarget.style.borderColor = 'var(--border)')
+                }
+              />
+
+              <p className="mt-2.5 text-[11.5px] text-content-3">
+                Headphones recommended — the stereo placement is the good part.
+              </p>
             </div>
           </div>
         </div>
-      </div>
+      </Reveal>
     </section>
+  );
+}
+
+// ── Bits ───────────────────────────────────────────────────────────
+
+function SegmentedTabs({
+  value,
+  onChange,
+}: {
+  value: 'all' | SwitchType;
+  onChange: (v: 'all' | SwitchType) => void;
+}) {
+  return (
+    <div className="segment">
+      {TABS.map((tab) => {
+        const isActive = value === tab;
+        const count =
+          tab === 'all'
+            ? switchProfiles.length
+            : switchProfiles.filter((p) => p.type === tab).length;
+
+        return (
+          <button
+            key={tab}
+            onClick={() => onChange(tab)}
+            data-active={isActive}
+            className="segment-item capitalize"
+          >
+            {isActive && (
+              <motion.span
+                layoutId="sandbox-tab"
+                className="absolute inset-0 rounded-[6px] bg-surface shadow-xs"
+                transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+              />
+            )}
+            <span className="relative z-10">
+              {tab}{' '}
+              <span className="tabular-nums opacity-50">{count}</span>
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function TestButton({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <motion.button
+      onClick={onClick}
+      whileTap={{ scale: 0.94 }}
+      className="rounded-sm border border-line bg-surface px-2.5 py-1 font-mono text-[10.5px] uppercase tracking-wider text-content-2 transition-colors hover:border-line-strong hover:text-content"
+    >
+      {label}
+    </motion.button>
   );
 }

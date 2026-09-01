@@ -1,39 +1,64 @@
 'use client';
 
+import { AnimatePresence, motion } from 'motion/react';
+import { useEffect, useState } from 'react';
+
 interface StatusBarProps {
   profileName: string;
   keystrokeCount: number;
   enabled: boolean;
 }
 
-export function StatusBar({ profileName, keystrokeCount, enabled }: StatusBarProps) {
-  return (
-    <div className="px-5 py-3 mt-auto bg-[#18181B] border-t border-[#27272A]">
-      <div className="flex items-center justify-between">
-        {/* Status */}
-        <div className="flex items-center gap-2">
-          <span
-            className="w-2 h-2 rounded-full"
-            style={{ backgroundColor: enabled ? '#00AFFF' : '#52525B' }}
-          />
-          <span className="text-[11px] font-mono font-semibold text-[#FFFFFF] truncate max-w-[130px]">
-            {enabled ? profileName : 'MUTED'}
-          </span>
-          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-[2px] bg-[#111113] text-[#00AFFF] border border-[#27272A]">
-            &lt;10MS
-          </span>
-        </div>
+export function StatusBar({
+  profileName,
+  keystrokeCount,
+  enabled,
+}: StatusBarProps) {
+  const [isMac, setIsMac] = useState(false);
 
-        {/* Keystrokes & Hotkey */}
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] text-[#A1A1AA] font-mono tabular-nums">
-            {keystrokeCount.toLocaleString()} KEYS
-          </span>
-          <kbd className="text-[9px] font-mono text-[#00AFFF] bg-[#111113] border border-[#27272A] px-1.5 py-0.5 rounded-[2px]">
-            Ctrl+Shift+K
-          </kbd>
-        </div>
+  useEffect(() => {
+    if (typeof navigator !== 'undefined') {
+      setIsMac(/mac|darwin/i.test(navigator.userAgent));
+    }
+  }, []);
+
+  return (
+    <footer className="mt-auto flex flex-shrink-0 items-center justify-between border-t border-line bg-surface px-4 py-3">
+      <div className="flex min-w-0 items-center gap-2">
+        <motion.span
+          className="h-1.5 w-1.5 flex-shrink-0 rounded-full"
+          style={{
+            backgroundColor: enabled ? 'var(--accent)' : 'var(--text-3)',
+          }}
+          animate={enabled ? { opacity: [1, 0.3, 1] } : { opacity: 1 }}
+          transition={{ duration: 2.2, repeat: enabled ? Infinity : 0 }}
+        />
+
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={enabled ? profileName : 'muted'}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.2 }}
+            className="truncate text-[12px] font-medium text-content"
+          >
+            {enabled ? profileName : 'Muted'}
+          </motion.span>
+        </AnimatePresence>
       </div>
-    </div>
+
+      <div className="flex flex-shrink-0 items-center gap-2.5">
+        <span className="font-mono text-[11px] tabular-nums text-content-3">
+          {keystrokeCount.toLocaleString()} keys
+        </span>
+        <kbd
+          className="rounded-sm border border-line px-1.5 py-0.5 font-mono text-[10px] text-content-2"
+          style={{ backgroundColor: 'var(--surface-inset)' }}
+        >
+          {isMac ? '⌘⇧K' : 'Ctrl+⇧+K'}
+        </kbd>
+      </div>
+    </footer>
   );
 }

@@ -2,15 +2,32 @@
 
 import { useEffect, useRef } from 'react';
 import { audioEngine } from '@/lib/audio-engine';
+import { useTheme } from '@/lib/theme';
 
 interface AudioVisualizerWaveProps {
   height?: number;
   className?: string;
+  /** Draw on a bare background instead of an inset panel. */
+  bare?: boolean;
 }
 
-export function AudioVisualizerWave({ height = 36, className = '' }: AudioVisualizerWaveProps) {
+/** Reads a CSS custom property off <html> as a concrete colour string. */
+function cssVar(name: string, fallback: string): string {
+  if (typeof window === 'undefined') return fallback;
+  const v = getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim();
+  return v || fallback;
+}
+
+export function AudioVisualizerWave({
+  height = 40,
+  className = '',
+  bare = false,
+}: AudioVisualizerWaveProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { theme } = useTheme();
 
   useEffect(() => {
     const container = containerRef.current;
@@ -19,27 +36,32 @@ export function AudioVisualizerWave({ height = 36, className = '' }: AudioVisual
     const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
+    // Palette is resolved once per theme change rather than every frame.
+    const accent = cssVar('--accent', '#b0524a');
+    const idle = cssVar('--text-3', '#8b8578');
+    const baseline = cssVar('--border', '#ded8c7');
+
     let animationId: number;
     let time = 0;
     const freqData = new Uint8Array(64);
 
-    // Number of visualizer bars
-    const barCount = 42;
-    // Envelope / decay heights for smooth, snappy physics
+    const barCount = 48;
     const currentHeights = new Float32Array(barCount).fill(0);
     const peakHeights = new Float32Array(barCount).fill(0);
     const peakSpeeds = new Float32Array(barCount).fill(0);
 
-    let displayWidth = 340;
-    let displayHeight = height;
+    let displayWidth = 0;
+    const displayHeight = height;
 
+    // Only the observed *width* feeds back into the canvas, and only when it
+    // actually changes — resizing the canvas inside its own observer callback
+    // otherwise loops forever and starves the compositor.
     const resize = () => {
-      if (!container || !canvas) return;
-      const rect = container.getBoundingClientRect();
-      displayWidth = Math.max(100, Math.floor(rect.width));
-      displayHeight = height;
+      const w = Math.max(100, Math.floor(container.clientWidth));
+      if (w === displayWidth) return;
+      displayWidth = w;
 
-      const dpr = typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1;
+      const dpr = window.devicePixelRatio || 1;
       canvas.width = Math.floor(displayWidth * dpr);
       canvas.height = Math.floor(displayHeight * dpr);
       canvas.style.width = `${displayWidth}px`;
@@ -49,9 +71,7 @@ export function AudioVisualizerWave({ height = 36, className = '' }: AudioVisual
       ctx.scale(dpr, dpr);
     };
 
-    const resizeObserver = new ResizeObserver(() => {
-      resize();
-    });
+    const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
     resize();
 
@@ -59,110 +79,76 @@ export function AudioVisualizerWave({ height = 36, className = '' }: AudioVisual
       time += 0.04;
       audioEngine.getAnalyserData(freqData);
 
-      // Check if there is active audio energy
       let totalEnergy = 0;
-      for (let i = 0; i < freqData.length; i++) {
-        totalEnergy += freqData[i];
-      }
-      const avgEnergy = totalEnergy / freqData.length;
-      const isAudioActive = avgEnergy > 2.5;
+      for (let i = 0; i < freqData.length; i++) totalEnergy += freqData[i];
+      const isAudioActive = totalEnergy / freqData.length > 2.5;
 
       ctx.clearRect(0, 0, displayWidth, displayHeight);
 
-      // Calculate bar widths and gaps
-      const totalGaps = barCount - 1;
-      const gap = Math.max(2, Math.min(4, displayWidth / 120));
-      const totalGapWidth = totalGaps * gap;
-      const barWidth = Math.max(2, (displayWidth - totalGapWidth - 12) / barCount);
-      const startX = (displayWidth - (barCount * barWidth + totalGaps * gap)) / 2;
+      const gap = Math.max(2, Math.min(4, displayWidth / 140));
+      const totalGapWidth = (barCount - 1) * gap;
+      const barWidth = Math.max(2, (displayWidth - totalGapWidth - 10) / barCount);
+      const startX =
+        (displayWidth - (barCount * barWidth + totalGapWidth)) / 2;
+      const mid = displayHeight / 2;
 
-      // Draw horizontal baseline reference line
+      // Baseline
       ctx.beginPath();
-      ctx.moveTo(startX, displayHeight / 2);
-      ctx.lineTo(startX + barCount * (barWidth + gap) - gap, displayHeight / 2);
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.moveTo(startX, mid);
+      ctx.lineTo(startX + barCount * (barWidth + gap) - gap, mid);
+      ctx.strokeStyle = baseline;
       ctx.lineWidth = 1;
       ctx.stroke();
 
       for (let i = 0; i < barCount; i++) {
-        // Map bar index to frequency spectrum
         const freqIndex = Math.min(
           freqData.length - 1,
           Math.floor(Math.pow(i / barCount, 1.2) * (freqData.length - 1)),
         );
-        const rawValue = freqData[freqIndex] || 0;
-        const normalizedFreq = Math.min(1, rawValue / 200);
+        const normalizedFreq = Math.min(1, (freqData[freqIndex] || 0) / 200);
 
-        // Ambient idle undulating wave (sine harmonics)
+        // Gentle idle undulation so the strip never looks dead
         const centerDist = Math.abs(i - barCount / 2) / (barCount / 2);
         const centerBell = Math.cos(centerDist * (Math.PI / 2.2));
-        const idleWave = (
-          Math.sin(time * 1.5 + i * 0.28) * 0.4 +
-          Math.cos(time * 0.9 - i * 0.18) * 0.35 +
-          0.5
-        ) * centerBell * 0.28;
+        const idleWave =
+          (Math.sin(time * 1.4 + i * 0.26) * 0.4 +
+            Math.cos(time * 0.85 - i * 0.17) * 0.35 +
+            0.5) *
+          centerBell *
+          0.3;
 
-        // Combine audio FFT with ambient wave
-        const targetNormalized = Math.max(idleWave, normalizedFreq * 1.3);
-        const targetHeight = Math.max(3, targetNormalized * (displayHeight - 8));
+        const target = Math.max(idleWave, normalizedFreq * 1.3);
+        const targetHeight = Math.max(3, target * (displayHeight - 8));
 
-        // Physics: fast attack, smooth exponential decay
         if (targetHeight > currentHeights[i]) {
-          currentHeights[i] = targetHeight; // Instant snap on keystroke strike
+          currentHeights[i] = targetHeight; // snap on strike
         } else {
-          currentHeights[i] += (targetHeight - currentHeights[i]) * 0.18; // Smooth decay
+          currentHeights[i] += (targetHeight - currentHeights[i]) * 0.17;
         }
 
         const h = Math.min(displayHeight - 4, currentHeights[i]);
 
-        // Peak hold physics
         if (h >= peakHeights[i]) {
           peakHeights[i] = h;
           peakSpeeds[i] = 0;
         } else {
-          peakSpeeds[i] += 0.35; // Gravity
+          peakSpeeds[i] += 0.35;
           peakHeights[i] = Math.max(h, peakHeights[i] - peakSpeeds[i]);
         }
 
         const x = startX + i * (barWidth + gap);
         const y = (displayHeight - h) / 2;
-
-        // Bar styling
         const barActive = normalizedFreq > 0.06 || isAudioActive;
-        const gradient = ctx.createLinearGradient(x, y, x, y + h);
 
-        if (barActive) {
-          gradient.addColorStop(0, '#59CBFF');
-          gradient.addColorStop(0.5, '#00AFFF');
-          gradient.addColorStop(1, '#0077CC');
-          ctx.fillStyle = gradient;
-          ctx.shadowColor = '#00AFFF';
-          ctx.shadowBlur = Math.min(12, normalizedFreq * 16);
-        } else {
-          gradient.addColorStop(0, 'rgba(0, 175, 255, 0.4)');
-          gradient.addColorStop(0.5, 'rgba(0, 175, 255, 0.25)');
-          gradient.addColorStop(1, 'rgba(39, 39, 42, 0.6)');
-          ctx.fillStyle = gradient;
-          ctx.shadowBlur = 0;
-        }
+        ctx.fillStyle = barActive ? accent : idle;
+        ctx.globalAlpha = barActive ? 1 : 0.7;
 
-        // Draw rounded rectangle bar
-        const radius = Math.min(barWidth / 2, 2);
         ctx.beginPath();
-        if (ctx.roundRect) {
-          ctx.roundRect(x, y, barWidth, h, radius);
-        } else {
-          ctx.rect(x, y, barWidth, h);
-        }
+        const radius = Math.min(barWidth / 2, 2);
+        if (ctx.roundRect) ctx.roundRect(x, y, barWidth, h, radius);
+        else ctx.rect(x, y, barWidth, h);
         ctx.fill();
-        ctx.shadowBlur = 0;
-
-        // Draw glowing peak cap dot when active or high peak
-        if (peakHeights[i] > 6) {
-          const peakY = (displayHeight - peakHeights[i]) / 2;
-          ctx.fillStyle = barActive ? '#FFFFFF' : 'rgba(0, 175, 255, 0.7)';
-          ctx.fillRect(x, Math.max(1, peakY - 1), barWidth, 1.5);
-        }
+        ctx.globalAlpha = 1;
       }
 
       animationId = requestAnimationFrame(render);
@@ -174,15 +160,17 @@ export function AudioVisualizerWave({ height = 36, className = '' }: AudioVisual
       resizeObserver.disconnect();
       cancelAnimationFrame(animationId);
     };
-  }, [height]);
+  }, [height, theme]);
 
   return (
     <div
       ref={containerRef}
-      className={`w-full relative flex items-center justify-center overflow-hidden rounded-[2px] bg-[#18181B] border border-[#27272A] p-1.5 shadow-inner ${className}`}
-      style={{ minHeight: `${height}px` }}
+      className={`relative flex w-full items-center justify-center overflow-hidden ${
+        bare ? '' : 'card-inset'
+      } ${className}`}
+      style={{ height: height + (bare ? 0 : 12), padding: bare ? 0 : 6 }}
     >
-      <canvas ref={canvasRef} className="block w-full h-full" />
+      <canvas ref={canvasRef} className="block" />
     </div>
   );
 }

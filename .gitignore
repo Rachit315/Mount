@@ -9,3 +9,5 @@ renderer/public/downloads/
 *.log
 .DS_Store
 Thumbs.db
+*.tsbuildinfo
+.claude/

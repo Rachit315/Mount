@@ -76,7 +76,9 @@ function createWindow(): void {
     // On Windows, hide from taskbar; on macOS, dock is hidden via app.dock.hide()
     skipTaskbar: !isMac,
     icon: icon.isEmpty() ? undefined : icon,
-    backgroundColor: '#000000',
+    // Matches the renderer's dark --bg so the window doesn't flash black
+    // before the theme script runs.
+    backgroundColor: '#212120',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,

@@ -1,48 +1,54 @@
 'use client';
 
 import { useState } from 'react';
-import { VortexBackground } from '@/components/VortexBackground';
+import { motion, useScroll, useSpring } from 'motion/react';
+import { SoundSessionProvider } from '@/lib/sound-session';
+import { AmbientBackground } from '@/components/AmbientBackground';
 import { LandingNavbar } from '@/components/LandingNavbar';
 import { LandingHero } from '@/components/LandingHero';
 import { LandingSandbox } from '@/components/LandingSandbox';
 import { LandingSwitches } from '@/components/LandingSwitches';
 import { LandingFeatures } from '@/components/LandingFeatures';
+import { LandingCTA } from '@/components/LandingCTA';
 import { LandingDownloadModal } from '@/components/LandingDownloadModal';
 import { LandingFooter } from '@/components/LandingFooter';
 
 export default function LandingPage() {
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
+  const { scrollYProgress } = useScroll();
+  const progress = useSpring(scrollYProgress, {
+    stiffness: 180,
+    damping: 30,
+    restDelta: 0.001,
+  });
+
+  const openDownload = () => setDownloadModalOpen(true);
 
   return (
-    <div className="min-h-screen bg-[#000000] text-[#FFFFFF] relative overflow-x-hidden selection:bg-[#00AFFF] selection:text-[#000000]">
-      {/* Animated Vortex Background Effect */}
-      <VortexBackground />
+    <SoundSessionProvider>
+      <div className="relative min-h-screen overflow-x-hidden bg-bg text-content">
+        {/* Reading progress */}
+        <motion.div
+          className="fixed inset-x-0 top-0 z-[70] h-[2px] origin-left"
+          style={{ scaleX: progress, backgroundColor: 'var(--accent)' }}
+        />
 
-      {/* Navigation */}
-      <LandingNavbar onOpenDownload={() => setDownloadModalOpen(true)} />
+        <AmbientBackground />
 
-      {/* Hero Section */}
-      <LandingHero
-        onOpenDownload={() => setDownloadModalOpen(true)}
-      />
+        <LandingNavbar onOpenDownload={openDownload} />
+        <LandingHero onOpenDownload={openDownload} />
+        <LandingSandbox />
+        <LandingSwitches />
+        <LandingFeatures />
+        <LandingCTA onOpenDownload={openDownload} />
 
-      {/* Live Sound Engine Sandbox */}
-      <LandingSandbox />
+        <LandingDownloadModal
+          isOpen={downloadModalOpen}
+          onClose={() => setDownloadModalOpen(false)}
+        />
 
-      {/* Switch Profiles Showcase */}
-      <LandingSwitches />
-
-      {/* Architecture & Features */}
-      <LandingFeatures />
-
-      {/* Direct Download Modal */}
-      <LandingDownloadModal
-        isOpen={downloadModalOpen}
-        onClose={() => setDownloadModalOpen(false)}
-      />
-
-      {/* Footer */}
-      <LandingFooter />
-    </div>
+        <LandingFooter />
+      </div>
+    </SoundSessionProvider>
   );
 }

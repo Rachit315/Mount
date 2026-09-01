@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { switchProfiles, SwitchType } from '@/lib/switch-profiles';
 import { audioEngine } from '@/lib/audio-engine';
 
@@ -9,89 +10,125 @@ interface SwitchSelectorProps {
   onSelect: (id: string) => void;
 }
 
+const TABS = ['all', 'linear', 'tactile', 'clicky'] as const;
+const EASE = [0.22, 1, 0.36, 1] as const;
+
 export function SwitchSelector({ selectedId, onSelect }: SwitchSelectorProps) {
   const [filter, setFilter] = useState<'all' | SwitchType>('all');
 
-  const filteredProfiles = filter === 'all'
-    ? switchProfiles
-    : switchProfiles.filter((p) => p.type === filter);
+  const filteredProfiles =
+    filter === 'all'
+      ? switchProfiles
+      : switchProfiles.filter((p) => p.type === filter);
 
   return (
-    <div className="px-5 py-3">
-      <div className="flex items-center justify-between mb-2">
-        <span className="label-md text-[#A1A1AA]">
-          // SWITCH_PROFILE
-        </span>
-        <span className="font-mono text-[10px] text-[#71717A]">
-          {switchProfiles.length} REAL PACKS
+    <div className="px-4 py-3">
+      <div className="mb-2.5 flex items-center justify-between">
+        <span className="label-md">Switch</span>
+        <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-content-3">
+          {switchProfiles.length} packs
         </span>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex items-center gap-1 mb-2.5 p-0.5 bg-[#111113] rounded-[2px] border border-[#27272A]">
-        {(['all', 'linear', 'tactile', 'clicky'] as const).map((tab) => {
+      <div className="segment mb-3">
+        {TABS.map((tab) => {
           const isActive = filter === tab;
-          const count = tab === 'all'
-            ? switchProfiles.length
-            : switchProfiles.filter((p) => p.type === tab).length;
+          const count =
+            tab === 'all'
+              ? switchProfiles.length
+              : switchProfiles.filter((p) => p.type === tab).length;
 
           return (
             <button
               key={tab}
               onClick={() => setFilter(tab)}
-              className={`flex-1 py-1 px-1.5 text-[9px] font-mono font-semibold rounded-[2px] uppercase transition-all cursor-pointer ${
-                isActive
-                  ? 'bg-[#00AFFF] text-[#000000] font-bold shadow-sm'
-                  : 'text-[#A1A1AA] hover:text-[#FFFFFF] hover:bg-white/[0.03]'
-              }`}
+              data-active={isActive}
+              className="segment-item !px-1.5 !py-1 !text-[11px] capitalize"
             >
-              {tab} [{count}]
+              {isActive && (
+                <motion.span
+                  layoutId="app-switch-tab"
+                  className="absolute inset-0 rounded-[6px] bg-surface shadow-xs"
+                  transition={{ type: 'spring', stiffness: 440, damping: 34 }}
+                />
+              )}
+              <span className="relative z-10">
+                {tab} <span className="tabular-nums opacity-50">{count}</span>
+              </span>
             </button>
           );
         })}
       </div>
 
-      {/* Grid of Switch Profiles */}
-      <div className="grid grid-cols-2 gap-2 max-h-[220px] overflow-y-auto pr-0.5 scrollbar-thin">
-        {filteredProfiles.map((profile) => {
-          const isSelected = profile.id === selectedId;
-          return (
-            <button
-              key={profile.id}
-              onClick={() => {
-                onSelect(profile.id);
-                audioEngine.playKeystroke(30, 'press', profile.id);
-              }}
-              className={`p-2.5 rounded-[2px] text-left cursor-pointer transition-all duration-150 relative border ${
-                isSelected
-                  ? 'bg-[#27272A] border-[#00AFFF] shadow-[0_0_12px_rgba(0,175,255,0.2)]'
-                  : 'bg-[#18181B] border-[#27272A] hover:border-[#3F3F46]'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-1.5 min-w-0">
+      <motion.div
+        layout
+        className="scrollbar-thin grid max-h-[224px] grid-cols-2 gap-2 overflow-y-auto pr-1"
+      >
+        <AnimatePresence mode="popLayout">
+          {filteredProfiles.map((profile, i) => {
+            const isSelected = profile.id === selectedId;
+
+            return (
+              <motion.button
+                key={profile.id}
+                layout
+                initial={{ opacity: 0, scale: 0.94 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.94 }}
+                transition={{ duration: 0.28, ease: EASE, delay: (i % 8) * 0.02 }}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => {
+                  onSelect(profile.id);
+                  audioEngine.playKeystroke(30, 'press', profile.id);
+                }}
+                className="relative overflow-hidden rounded-md border p-2.5 text-left"
+                style={{
+                  borderColor: isSelected
+                    ? 'var(--accent-line)'
+                    : 'var(--border)',
+                  backgroundColor: isSelected
+                    ? 'var(--accent-soft)'
+                    : 'var(--surface-inset)',
+                  transition:
+                    'border-color 0.22s var(--ease-out), background-color 0.22s var(--ease-out)',
+                }}
+              >
+                <div className="mb-1.5 flex items-center gap-1.5">
                   <span
-                    className="w-2 h-2 rounded-full flex-shrink-0"
+                    className="h-2 w-2 flex-shrink-0 rounded-full"
                     style={{ backgroundColor: profile.color }}
                   />
-                  <span className="text-[11px] font-mono font-semibold text-[#FFFFFF] leading-none truncate">
+                  <span className="truncate text-[11.5px] font-semibold leading-none text-content">
                     {profile.name}
                   </span>
                 </div>
-              </div>
 
-              <div className="flex items-center justify-between text-[9px] font-mono">
-                <span className="text-[#A1A1AA] uppercase">
-                  {profile.type} &bull; {profile.actuation}
-                </span>
-                <span className="text-[#00AFFF] px-1 py-0.2 bg-[#00AFFF]/10 rounded-[2px]">
-                  {profile.tag}
-                </span>
-              </div>
-            </button>
-          );
-        })}
-      </div>
+                <div className="flex items-center justify-between gap-1 font-mono text-[9.5px] uppercase tracking-[0.08em]">
+                  <span className="text-content-3">{profile.type}</span>
+                  <span
+                    className="truncate"
+                    style={{
+                      color: isSelected ? 'var(--accent)' : 'var(--text-3)',
+                    }}
+                  >
+                    {profile.tag}
+                  </span>
+                </div>
+
+                {isSelected && (
+                  <motion.span
+                    layoutId="app-switch-marker"
+                    className="absolute inset-y-0 left-0 w-[2.5px]"
+                    style={{ backgroundColor: 'var(--accent)' }}
+                    transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                  />
+                )}
+              </motion.button>
+            );
+          })}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 }

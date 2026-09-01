@@ -5,69 +5,48 @@ interface LogoIconProps {
   className?: string;
 }
 
+/**
+ * A single keycap seen slightly from above — the mark reads at 20px and picks
+ * up the theme's accent so it sits inside the palette instead of fighting it.
+ */
 export function LogoIcon({ size = 28, className = '' }: LogoIconProps) {
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 100 100"
+      viewBox="0 0 32 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
+      aria-hidden
     >
-      <g clipPath="url(#mount-logo-clip)">
-        <rect width="100" height="100" rx="12" fill="#59CBFF" />
-        <g filter="url(#mount-logo-filter)">
-          <path
-            d="M2.99989 1.50006L104.5 95.0001L96.5 105L-1.00023 11.0002L2.99989 1.50006Z"
-            fill="white"
-            fillOpacity="0.8"
-          />
-        </g>
-      </g>
+      {/* Case / base */}
       <rect
-        x="8.5"
-        y="6.5"
-        width="83"
-        height="83"
-        rx="11.5"
-        fill="#00AFFF"
-        stroke="#6BD0FF"
-        strokeWidth="2"
+        x="1"
+        y="2"
+        width="30"
+        height="28"
+        rx="7"
+        fill="var(--accent)"
       />
+
+      {/* Cap body */}
       <path
-        d="M46.546 55.092L44.474 21.2H56.61L54.538 55.092H46.546ZM44.4 67.376C44.4 63.898 47.212 61.16 50.542 61.16C53.872 61.16 56.684 63.898 56.684 67.376C56.684 70.706 54.02 73.444 50.542 73.444C47.064 73.444 44.4 70.706 44.4 67.376Z"
-        fill="url(#mount-logo-paint)"
+        d="M6.4 9.6a3 3 0 0 1 3-3h13.2a3 3 0 0 1 3 3v11.6a3.6 3.6 0 0 1-3.6 3.6H10a3.6 3.6 0 0 1-3.6-3.6V9.6Z"
+        fill="var(--cap-alpha)"
       />
-      <defs>
-        <filter
-          id="mount-logo-filter"
-          x="-21"
-          y="-18.5"
-          width="145.5"
-          height="143.5"
-          filterUnits="userSpaceOnUse"
-          colorInterpolationFilters="sRGB"
-        >
-          <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-          <feGaussianBlur stdDeviation="10" result="effect1_foregroundBlur" />
-        </filter>
-        <linearGradient
-          id="mount-logo-paint"
-          x1="51"
-          y1="21.5"
-          x2="50"
-          y2="74.5"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop offset="0.264745" stopColor="white" />
-          <stop offset="1" stopColor="#EBEBEB" />
-        </linearGradient>
-        <clipPath id="mount-logo-clip">
-          <rect width="100" height="100" rx="12" fill="white" />
-        </clipPath>
-      </defs>
+
+      {/* Top surface highlight */}
+      <path
+        d="M8.9 10.6a2 2 0 0 1 2-2h10.2a2 2 0 0 1 2 2v6.2a2.4 2.4 0 0 1-2.4 2.4h-9.4a2.4 2.4 0 0 1-2.4-2.4v-6.2Z"
+        fill="var(--cap-alpha-top)"
+      />
+
+      {/* Legend — the "M" stem */}
+      <path
+        d="M12.4 17.4V11.9h1.9l2 3.1 2-3.1h1.9v5.5h-1.6v-3l-1.6 2.5h-1.4l-1.6-2.5v3h-1.6Z"
+        fill="var(--accent)"
+      />
     </svg>
   );
 }

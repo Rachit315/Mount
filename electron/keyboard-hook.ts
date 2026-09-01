@@ -20,8 +20,10 @@ export function setupKeyboardHook(window: BrowserWindow): void {
     });
   });
 
+  // keyup is forwarded even while muted so the renderer's held-key set stays
+  // accurate; it decides on its own whether to voice the release.
   uIOhook.on('keyup', (e) => {
-    if (!enabled || !targetWindow || targetWindow.isDestroyed()) return;
+    if (!targetWindow || targetWindow.isDestroyed()) return;
     targetWindow.webContents.send('keystroke', {
       keycode: e.keycode,
       type: 'keyup',

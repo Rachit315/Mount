@@ -3,35 +3,40 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { LogoIcon } from './LogoIcon';
-
-const DOWNLOAD_WINDOWS_URL =
-  'https://github.com/Rachit315/Mount/releases/latest/download/Mount-Windows-x64.zip';
-const GITHUB_RELEASES_PAGE = 'https://github.com/Rachit315/Mount/releases';
-const CLONE_COMMAND =
-  'git clone https://github.com/Rachit315/Mount.git && cd Mount && npm install && npm run dev';
-
-const STEPS = [
-  {
-    n: '01',
-    text: 'Download Mount-Windows-x64.zip',
-    code: 'Mount-Windows-x64.zip',
-  },
-  { n: '02', text: 'Extract it anywhere on your PC' },
-  { n: '03', text: 'Run Mount.exe — it drops straight into your tray' },
-];
+import {
+  APP_VERSION,
+  DOWNLOADS,
+  INSTALL_STEPS,
+  MAC_GATEKEEPER_NOTE,
+  MAC_QUARANTINE_COMMAND,
+  MAC_TARGETS,
+  RELEASES_PAGE,
+  detectPlatform,
+  familyOf,
+  type PlatformFamily,
+} from '@/lib/downloads';
 
 interface LandingDownloadModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+const EASE = [0.22, 1, 0.36, 1] as const;
+
 export function LandingDownloadModal({
   isOpen,
   onClose,
 }: LandingDownloadModalProps) {
+  const [tab, setTab] = useState<Exclude<PlatformFamily, 'unknown'>>('windows');
   const [copied, setCopied] = useState(false);
 
-  // Escape to dismiss, and don't let the page scroll behind the sheet.
+  // Open on whichever platform the visitor is actually using.
+  useEffect(() => {
+    if (!isOpen) return;
+    const family = familyOf(detectPlatform());
+    if (family !== 'unknown') setTab(family);
+  }, [isOpen]);
+
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
@@ -45,10 +50,12 @@ export function LandingDownloadModal({
   }, [isOpen, onClose]);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(CLONE_COMMAND);
+    navigator.clipboard.writeText(MAC_QUARANTINE_COMMAND);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 2000);
   };
+
+  const steps = INSTALL_STEPS[tab];
 
   return (
     <AnimatePresence>
@@ -75,7 +82,7 @@ export function LandingDownloadModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 320, damping: 28 }}
-            className="card relative w-full max-w-lg overflow-hidden p-6 shadow-lg sm:p-7"
+            className="card relative max-h-[88vh] w-full max-w-lg overflow-y-auto p-6 shadow-lg sm:p-7"
           >
             {/* Header */}
             <div className="mb-5 flex items-start justify-between gap-4">
@@ -86,7 +93,7 @@ export function LandingDownloadModal({
                     Download Mount
                   </h2>
                   <p className="text-[12.5px] text-content-2">
-                    v2.0.0 · Windows x64 portable
+                    v{APP_VERSION} · free and open source
                   </p>
                 </div>
               </div>
@@ -97,7 +104,7 @@ export function LandingDownloadModal({
                 whileHover={{ rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
                 transition={{ type: 'spring', stiffness: 380, damping: 18 }}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface-inset text-content-2 hover:text-content"
+                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-line bg-surface-inset text-content-2 hover:text-content"
               >
                 <svg
                   width="14"
@@ -113,99 +120,180 @@ export function LandingDownloadModal({
               </motion.button>
             </div>
 
-            <p className="mb-5 text-[13.5px] leading-relaxed text-content-2">
-              A self-contained bundle with the native keyboard driver already
-              compiled in. No installer, no setup, no account.
-            </p>
-
-            {/* Steps */}
-            <ol className="card-inset mb-5 space-y-3 p-4">
-              {STEPS.map((s, i) => (
-                <motion.li
-                  key={s.n}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 + i * 0.07, duration: 0.35 }}
-                  className="flex items-start gap-3 text-[13px]"
-                >
-                  <span
-                    className="font-mono text-[11px] font-bold"
-                    style={{ color: 'var(--accent)' }}
-                  >
-                    {s.n}
-                  </span>
-                  <span className="text-content-2">
-                    {s.code ? (
-                      <>
-                        Download{' '}
-                        <code className="rounded-sm border border-line bg-surface px-1.5 py-0.5 font-mono text-[11.5px] text-content">
-                          {s.code}
-                        </code>
-                      </>
-                    ) : (
-                      s.text
-                    )}
-                  </span>
-                </motion.li>
-              ))}
-            </ol>
-
-            {/* Source */}
-            <div className="card-inset mb-6 p-3">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="label-md">Or run from source</span>
+            {/* Platform tabs */}
+            <div className="segment mb-5">
+              {(['windows', 'mac'] as const).map((t) => (
                 <button
-                  onClick={handleCopy}
-                  className="font-mono text-[11px] font-semibold transition-opacity hover:opacity-70"
-                  style={{ color: 'var(--accent)' }}
+                  key={t}
+                  onClick={() => setTab(t)}
+                  data-active={tab === t}
+                  className="segment-item"
                 >
-                  {copied ? '✓ Copied' : 'Copy'}
+                  {tab === t && (
+                    <motion.span
+                      layoutId="download-tab"
+                      className="absolute inset-0 rounded-[6px] bg-surface shadow-xs"
+                      transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center justify-center gap-1.5">
+                    {t === 'windows' ? <WindowsIcon /> : <AppleIcon />}
+                    {t === 'windows' ? 'Windows' : 'macOS'}
+                  </span>
                 </button>
-              </div>
-              <pre className="overflow-x-auto rounded-sm border border-line bg-surface p-2.5 font-mono text-[11px] leading-relaxed text-content">
-                {CLONE_COMMAND}
-              </pre>
+              ))}
             </div>
 
-            {/* Actions */}
-            <div className="flex flex-wrap items-center gap-2.5">
-              <a
-                href={DOWNLOAD_WINDOWS_URL}
-                download="Mount-Windows-x64.zip"
-                className="btn btn-primary flex-1"
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={tab}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.22, ease: EASE }}
               >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-                Download for Windows
-              </a>
+                {/* Download buttons */}
+                {tab === 'windows' ? (
+                  <a
+                    href={DOWNLOADS.windows.url}
+                    download={DOWNLOADS.windows.fileName}
+                    className="btn btn-primary mb-2 w-full"
+                  >
+                    <DownloadIcon />
+                    Download for Windows
+                  </a>
+                ) : (
+                  <div className="mb-2 grid gap-2 sm:grid-cols-2">
+                    {MAC_TARGETS.map((target, i) => (
+                      <a
+                        key={target.id}
+                        href={target.url}
+                        download={target.fileName}
+                        className={`btn w-full flex-col !h-auto py-2.5 ${
+                          i === 0 ? 'btn-primary' : 'btn-ghost'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2 text-[13.5px]">
+                          <DownloadIcon />
+                          macOS
+                        </span>
+                        <span className="text-[11px] font-normal opacity-75">
+                          {target.subtitle}
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                )}
 
-              <a
-                href={GITHUB_RELEASES_PAGE}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-ghost"
-              >
-                All releases
-                <span aria-hidden style={{ color: 'var(--accent)' }}>
-                  ↗
-                </span>
-              </a>
-            </div>
+                <p className="mb-5 text-[11.5px] text-content-3">
+                  {tab === 'windows'
+                    ? DOWNLOADS.windows.subtitle
+                    : 'Not sure which? Apple menu → About This Mac. “Apple M1/M2/M3…” means Apple Silicon.'}
+                </p>
+
+                {/* Install steps */}
+                <ol className="card-inset mb-5 space-y-3 p-4">
+                  {steps.map((step, i) => (
+                    <li
+                      key={i}
+                      className="flex items-start gap-3 text-[13px] leading-relaxed"
+                    >
+                      <span
+                        className="font-mono text-[11px] font-bold"
+                        style={{ color: 'var(--accent)' }}
+                      >
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <span className="text-content-2">{step}</span>
+                    </li>
+                  ))}
+                </ol>
+
+                {/* macOS-only Gatekeeper help */}
+                {tab === 'mac' && (
+                  <div
+                    className="mb-5 rounded-md border p-3.5"
+                    style={{
+                      borderColor: 'var(--accent-line)',
+                      backgroundColor: 'var(--accent-soft)',
+                    }}
+                  >
+                    <p
+                      className="mb-2 text-[12.5px] font-medium leading-relaxed"
+                      style={{ color: 'var(--accent)' }}
+                    >
+                      {MAC_GATEKEEPER_NOTE}
+                    </p>
+                    <p className="mb-2 text-[11.5px] text-content-2">
+                      If macOS still says the app is damaged, clear the download
+                      quarantine flag in Terminal:
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 overflow-x-auto rounded-sm border border-line bg-surface px-2 py-1.5 font-mono text-[10.5px] text-content">
+                        {MAC_QUARANTINE_COMMAND}
+                      </code>
+                      <button
+                        onClick={handleCopy}
+                        className="flex-shrink-0 font-mono text-[11px] font-semibold transition-opacity hover:opacity-70"
+                        style={{ color: 'var(--accent)' }}
+                      >
+                        {copied ? '✓' : 'Copy'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+
+            <a
+              href={RELEASES_PAGE}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-ghost w-full"
+            >
+              All releases &amp; changelog
+              <span aria-hidden style={{ color: 'var(--accent)' }}>
+                ↗
+              </span>
+            </a>
           </motion.div>
         </div>
       )}
     </AnimatePresence>
+  );
+}
+
+function DownloadIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
+  );
+}
+
+function AppleIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M16.7 12.7c0-2.5 2-3.7 2.1-3.8-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.6.9s-1.9-.9-3.1-.8c-1.6 0-3.1.9-3.9 2.4-1.7 2.9-.4 7.2 1.2 9.5.8 1.2 1.7 2.4 3 2.4 1.2 0 1.6-.8 3.1-.8s1.9.8 3.1.7c1.3 0 2.1-1.2 2.9-2.3.9-1.3 1.3-2.6 1.3-2.7-.1 0-2.6-1-2.6-3.6ZM14.3 5.5c.7-.8 1.1-2 1-3.2-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.5 2.9-1.3Z" />
+    </svg>
+  );
+}
+
+function WindowsIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M3 5.6 10.2 4.6v7.1H3V5.6Zm0 12.8 7.2 1v-7H3v6ZM11.1 19.5 21 21V12.6h-9.9v6.9Zm0-15V11.7H21V3l-9.9 1.5Z" />
+    </svg>
   );
 }

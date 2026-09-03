@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { motion } from 'motion/react';
 import { LogoIcon } from './LogoIcon';
 import { ThemeToggle } from './ThemeToggle';
+import { DOWNLOADS, RELEASES_PAGE } from '@/lib/downloads';
 
 const LINK_GROUPS = [
   {
@@ -17,14 +18,13 @@ const LINK_GROUPS = [
   {
     title: 'Get it',
     links: [
+      { label: 'Download for Windows', href: DOWNLOADS.windows.url },
       {
-        label: 'Download for Windows',
-        href: 'https://github.com/Rachit315/Mount/releases/latest/download/Mount-Windows-x64.zip',
+        label: 'macOS · Apple Silicon',
+        href: DOWNLOADS['mac-arm64'].url,
       },
-      {
-        label: 'All releases',
-        href: 'https://github.com/Rachit315/Mount/releases',
-      },
+      { label: 'macOS · Intel', href: DOWNLOADS['mac-x64'].url },
+      { label: 'All releases', href: RELEASES_PAGE },
       { label: 'Web app', href: '/app', internal: true },
     ],
   },

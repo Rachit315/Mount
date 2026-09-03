@@ -86,25 +86,38 @@ jobs:
       - name: Build Electron TypeScript
         run: npm run build:electron
 
+      # Both architectures: Apple Silicon and Intel. A universal binary would
+      # be one download, but merging it trips over uiohook-napi's native
+      # .node files, so two clearly-labelled zips is the reliable route.
       - name: Package Electron app
-        run: npx electron-builder --mac --dir --publish never
+        run: npx electron-builder --mac --dir --arm64 --x64 --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
 
-      - name: Create zip archive
+      - name: Create zip archives
         run: |
-          APP_PATH="$(find release -maxdepth 2 -name 'Mount.app' -print -quit)"
-          if [ -z "$APP_PATH" ]; then
-            echo "Mount.app not found under release/" >&2
-            exit 1
-          fi
-          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" Mount-macOS-arm64.zip
+          set -e
+          zip_arch () {
+            local dir="$1" out="$2"
+            if [ -d "$dir/Mount.app" ]; then
+              # ditto preserves the bundle's symlinks and permissions; a plain
+              # `zip` corrupts the .app and macOS refuses to open it.
+              ditto -c -k --sequesterRsrc --keepParent "$dir/Mount.app" "$out"
+              echo "packed $out"
+            else
+              echo "missing $dir/Mount.app" >&2
+              return 1
+            fi
+          }
+          ls -la release
+          zip_arch "release/mac-arm64" "Mount-macOS-arm64.zip"
+          zip_arch "release/mac" "Mount-macOS-x64.zip"
 
-      - name: Upload macOS artifact
+      - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
         with:
           name: mount-macos
-          path: Mount-macOS-arm64.zip
+          path: Mount-macOS-*.zip
           if-no-files-found: error
 
   # ── Publish whatever built. Windows is required, macOS is optional. ──

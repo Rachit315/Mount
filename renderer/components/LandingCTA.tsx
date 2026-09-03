@@ -65,8 +65,8 @@ export function LandingCTA({ onOpenDownload }: LandingCTAProps) {
               Give your keyboard the sound it deserves
             </h2>
             <p className="body-md mx-auto mb-8 max-w-md">
-              Free, open source, and offline. Install it once and forget it&apos;s
-              running — until you start typing.
+              Free, open source, and offline, on Windows and macOS. Install it once
+              and forget it&apos;s running — until you start typing.
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-3">
